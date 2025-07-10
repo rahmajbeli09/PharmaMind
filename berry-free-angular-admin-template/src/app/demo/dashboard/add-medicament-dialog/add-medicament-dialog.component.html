@@ -1,0 +1,95 @@
+<div class="dialog">
+  <h2>{{ editMode ? 'Modifier un médicament' : 'Ajouter un médicament' }}</h2>
+  <button type="button" class="close-btn" (click)="onClose()"><i class="ti ti-x"></i></button>
+  <form class="medicament-form" #medicamentForm="ngForm" (ngSubmit)="onSubmit(medicamentForm)">
+    <div *ngIf="successMessage" class="success-message" @fadeInOut>
+      <i class="ti ti-circle-check"></i>
+      <span class="msg-text">{{ successMessage }}</span>
+    </div>
+    <div *ngIf="errorMessage" class="error-message">
+      <i class="ti ti-alert-circle"></i>
+      <span>{{ errorMessage }}</span>
+    </div>
+    
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <div class="form-group">
+          <label for="name" class="form-label">Nom</label>
+          <input type="text" class="form-control" id="name" name="name" required [(ngModel)]="localMedicament.name" />
+        </div>
+      </div>
+      <div class="col-md-6 mb-3">
+        <div class="form-group">
+          <label for="dosage" class="form-label">Dosage</label>
+          <input type="text" class="form-control" id="dosage" name="dosage" required [(ngModel)]="localMedicament.dosage" />
+        </div>
+      </div>
+    </div>
+    
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <div class="form-group">
+          <label for="forme" class="form-label">Forme</label>
+          <input type="text" class="form-control" id="forme" name="forme" required [(ngModel)]="localMedicament.forme" />
+        </div>
+      </div>
+      <div class="col-md-6 mb-3">
+        <div class="form-group">
+          <label for="presentation" class="form-label">Présentation</label>
+          <input type="text" class="form-control" id="presentation" name="presentation" required [(ngModel)]="localMedicament.presentation" />
+        </div>
+      </div>
+    </div>
+    
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <div class="form-group">
+          <label for="price" class="form-label">Prix (€)</label>
+          <input type="number" class="form-control" id="price" name="price" min="0" step="0.01" required [(ngModel)]="localMedicament.price" />
+        </div>
+      </div>
+      <div class="col-md-6 mb-3">
+        <div class="form-group">
+          <label for="remboursement" class="form-label">Remboursement (%)</label>
+          <input type="number" class="form-control" id="remboursement" name="remboursement" min="0" max="100" step="1" required [(ngModel)]="localMedicament.remboursement" />
+        </div>
+      </div>
+    </div>
+    
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <div class="form-group">
+          <label for="dci" class="form-label">DCI</label>
+          <input type="text" class="form-control" id="dci" name="dci" required [(ngModel)]="localMedicament.dci" />
+        </div>
+      </div>
+      <div class="col-md-6 mb-3">
+        <div class="form-group">
+          <label for="categorie" class="form-label">Catégorie</label>
+          <select class="form-select" id="categorie" name="categorie" required [(ngModel)]="localMedicament.categorie">
+            <option value="ANTIBIOTIQUE">ANTIBIOTIQUE</option>
+            <option value="ANTALGIQUE">ANTALGIQUE</option>
+            <option value="ANTIVIRAL">ANTIVIRAL</option>
+            <option value="VACCIN">VACCIN</option>
+            <option value="AUTRE">AUTRE</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <div class="form-group">
+          <label for="quantiteStock" class="form-label">Quantité en stock</label>
+          <input type="number" class="form-control" id="quantiteStock" name="quantiteStock" min="0" step="1" required [(ngModel)]="localMedicament.quantiteStock" />
+        </div>
+      </div>
+      <div class="col-md-6 d-flex align-items-end">
+        <button type="submit" class="btn btn-primary" [disabled]="loading">
+          <i *ngIf="loading" class="ti ti-loader me-2"></i>
+          {{ loading ? (editMode ? 'Modification...' : 'Ajout...') : (editMode ? 'Modifier' : 'Ajouter') }}
+        </button>
+      </div>
+    </div>
+  </form>
+</div>

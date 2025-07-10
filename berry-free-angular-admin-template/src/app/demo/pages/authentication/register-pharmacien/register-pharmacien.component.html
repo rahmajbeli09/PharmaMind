@@ -1,0 +1,170 @@
+<div class="auth-main">
+  <div class="auth-wrapper v3">
+    <div class="auth-form">
+      <div class="card mt-5">
+        <div class="card-body">
+          <a href="#" class="d-flex justify-content-center">
+            <img src="assets/images/logo.png" alt="logo" class="login-logo" />
+          </a>
+          <div class="row">
+            <div class="d-flex justify-content-center">
+              <div class="auth-header">
+                <h2 class="mt-5 primary-blue"><b>S'inscrire</b></h2>
+                <p class="fs-4 mt-2">Entrez vos informations pour continuer</p>
+              </div>
+            </div>
+          </div>
+          <!-- Progress Bar -->
+          <div class="progress mb-4">
+            <div class="progress-bar" role="progressbar" [style.width]="getProgress()"></div>
+          </div>
+
+          <form (ngSubmit)="onSubmit()" enctype="multipart/form-data" class="register-form" autocomplete="off">
+            <!-- PART 1 -->
+            <div *ngIf="step === 1">
+              <div class="row">
+                <div class="col-md-6 form-group">
+                  <label>Nom</label>
+                  <input type="text" [(ngModel)]="nom" name="nom" required class="form-control" [ngClass]="{'is-invalid': nomTouched && !nom}" (blur)="nomTouched=true" />
+                  <div *ngIf="nomTouched && !nom" class="text-danger small">Le nom est requis.</div>
+                </div>
+                <div class="col-md-6 form-group">
+                  <label>Email</label>
+                  <input type="email" [(ngModel)]="email" name="email" required class="form-control" [ngClass]="{'is-invalid': emailTouched && !isValidEmail(email)}" (blur)="emailTouched=true" />
+                  <div *ngIf="emailTouched && !isValidEmail(email)" class="text-danger small">Email invalide.</div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6 form-group">
+                  <label>Mot de passe</label>
+                  <input type="password" [(ngModel)]="motDePasse" name="motDePasse" required class="form-control" [ngClass]="{'is-invalid': motDePasseTouched && !isValidPassword(motDePasse)}" (blur)="motDePasseTouched=true" />
+                  <div *ngIf="motDePasseTouched && !isValidPassword(motDePasse)" class="text-danger small">Mot de passe trop court (6 caractères minimum).</div>
+                </div>
+                <div class="col-md-6 form-group">
+                  <label>Adresse</label>
+                  <input type="text" [(ngModel)]="adresse" name="adresse" required class="form-control" [ngClass]="{'is-invalid': adresseTouched && !adresse}" (blur)="adresseTouched=true" />
+                  <div *ngIf="adresseTouched && !adresse" class="text-danger small">L'adresse est requise.</div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6 form-group">
+                  <label>Ville</label>
+                  <input type="text" [(ngModel)]="ville" name="ville" required class="form-control" [ngClass]="{'is-invalid': villeTouched && !ville}" (blur)="villeTouched=true" />
+                  <div *ngIf="villeTouched && !ville" class="text-danger small">La ville est requise.</div>
+                </div>
+                <div class="col-md-6 form-group">
+                  <label>Date de naissance</label>
+                  <input type="date" [(ngModel)]="dateNaissance" name="dateNaissance" required 
+                         class="form-control" [ngClass]="{'is-invalid': dateNaissanceTouched && !dateNaissance}" 
+                         (blur)="dateNaissanceTouched=true" max="{{today | date:'yyyy-MM-dd'}}" />
+                  <div *ngIf="dateNaissanceTouched && !dateNaissance" class="text-danger small">La date de naissance est requise.</div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6 form-group">
+                  <label>CIN</label>
+                  <input type="text" [(ngModel)]="cin" name="cin" required 
+                         class="form-control" [ngClass]="{'is-invalid': cinTouched && !cin}" 
+                         (blur)="cinTouched=true" />
+                  <div *ngIf="cinTouched && !cin" class="text-danger small">Le CIN est requis.</div>
+                </div>
+                <div class="col-md-6 form-group">
+                  <label>Téléphone</label>
+                  <input type="tel" [(ngModel)]="telephone" name="telephone" required 
+                         class="form-control" [ngClass]="{'is-invalid': telephoneTouched && !telephone}" 
+                         (blur)="telephoneTouched=true" pattern="[0-9]{8}" />
+                  <div *ngIf="telephoneTouched && !telephone" class="text-danger small">Le numéro de téléphone est requis.</div>
+                  <small class="form-text text-muted">Format: 8 chiffres</small>
+                </div>
+              </div>
+              <div class="d-flex justify-content-between mt-3">
+                <button type="button" class="btn btn-secondary" (click)="goToStep(1)">
+                  <i class="bi bi-arrow-left"></i> Retour
+                </button>
+                <button type="button" class="btn btn-primary" [disabled]="!isPart1Valid()" (click)="goToStep(2)">
+                  Continuer <i class="bi bi-arrow-right"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- PART 2 -->
+            <div *ngIf="step === 2">
+              <div class="row">
+                <div class="col-md-6 form-group">
+                  <label>Nom de la pharmacie</label>
+                  <input type="text" [(ngModel)]="nomPharmacie" name="nomPharmacie" required class="form-control" />
+                </div>
+                <div class="col-md-6 form-group">
+                  <label>Adresse de la pharmacie</label>
+                  <input type="text" [(ngModel)]="adressePharmacie" name="adressePharmacie" required class="form-control" />
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6 form-group">
+                  <label>Gouvernorat</label>
+                  <input type="text" [(ngModel)]="gouvernorat" name="gouvernorat" required class="form-control" />
+                </div>
+                <div class="col-md-6 form-group">
+                  <label>Code Postal</label>
+                  <input type="text" [(ngModel)]="codePostal" name="codePostal" required class="form-control" />
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6 form-group">
+                  <label>Téléphone</label>
+                  <input type="text" [(ngModel)]="telephone" name="telephone" required class="form-control" />
+                </div>
+                <div class="col-md-6 form-group">
+                  <label>Diplôme (image)</label>
+                  <input type="file" (change)="onFileChange($event, 'diplome')" accept="image/*" class="form-control" />
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6 form-group">
+                  <label>Carte (image)</label>
+                  <input type="file" (change)="onFileChange($event, 'carte')" accept="image/*" class="form-control" />
+                </div>
+                <div class="col-md-6 form-group">
+                  <label>Autorisation (image)</label>
+                  <input type="file" (change)="onFileChange($event, 'autorisation')" accept="image/*" class="form-control" />
+                </div>
+              </div>
+              <div class="d-flex justify-content-between mt-3">
+                <button type="button" class="btn btn-secondary" (click)="goToStep(1)">
+                  <i class="bi bi-arrow-left"></i> Retour
+                </button>
+                <button type="button" class="btn btn-primary" (click)="goToStep(3)">
+                  Continuer <i class="bi bi-arrow-right"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- PART 3: Vérification Email -->
+            <div *ngIf="step === 3">
+              <div class="text-center mb-3">
+                <h5>Vérification de l'email</h5>
+                <p>Un code de vérification a été envoyé à votre adresse email. Veuillez le saisir ci-dessous :</p>
+              </div>
+              <div class="d-flex justify-content-center mb-3">
+                <input maxlength="1" type="text" class="form-control mx-1 text-center" style="width: 50px; font-size: 2rem;" [(ngModel)]="code1" name="code1" autocomplete="off" />
+                <input maxlength="1" type="text" class="form-control mx-1 text-center" style="width: 50px; font-size: 2rem;" [(ngModel)]="code2" name="code2" autocomplete="off" />
+                <input maxlength="1" type="text" class="form-control mx-1 text-center" style="width: 50px; font-size: 2rem;" [(ngModel)]="code3" name="code3" autocomplete="off" />
+                <input maxlength="1" type="text" class="form-control mx-1 text-center" style="width: 50px; font-size: 2rem;" [(ngModel)]="code4" name="code4" autocomplete="off" />
+              </div>
+              <div class="d-flex justify-content-between mt-3">
+                <button type="button" class="btn btn-secondary" (click)="goToStep(2)">
+                  <i class="bi bi-arrow-left"></i> Retour
+                </button>
+                <button type="button" class="btn btn-success" [disabled]="isSubmitting" (click)="submitVerificationCode()">
+                  Vérifier
+                </button>
+                <div *ngIf="verificationError" class="text-danger mt-2">{{ verificationError }}</div>
+              </div>
+            </div>
+          </form>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

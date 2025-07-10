@@ -1,0 +1,48 @@
+<div class="auth-main">
+  <div class="auth-wrapper v3">
+    <div class="auth-form">
+      <div class="card my-5">
+        <div class="card-body">
+          <a href="#" class="d-flex justify-content-center">
+            <img src="assets/images/logo.png" alt="logo" class="login-logo" />
+          </a>
+          <div class="row">
+            <div class="d-flex justify-content-center">
+              <div class="auth-header">
+                <h2 class="text-secondary mt-5 primary-blue"><b>Bonjour, bon retour </b></h2>
+                <p class="fs-4 mt-2">Entrez vos identifiants pour continuer                </p>
+              </div>
+            </div>
+          </div>
+         
+          <h5 class="my-4 d-flex justify-content-center">Connectez-vous avec votre adresse e-mail          </h5>
+          <div class="form-floating mb-3">
+            <input type="email" class="form-control" id="floatingInput" [(ngModel)]="email" name="email" autocomplete="username" />
+            <label for="floatingInput">Adresse e-mail / Nom d’utilisateur</label>
+          </div>
+          <div class="form-floating mb-3">
+            <input type="password" class="form-control" id="password" [(ngModel)]="motDePasse" name="motDePasse" autocomplete="current-password" />
+            <label for="password">Mot de passe </label>
+          </div>
+          <div class="d-flex mt-1 justify-content-between">
+            <div class="form-check">
+              <input class="form-check-input input-primary" type="checkbox" id="customCheckc1" checked="" />
+              <label class="form-check-label text-muted" for="customCheckc1">Se souvenir de moi</label>
+            </div>
+            <h5 class="text-secondary">
+              <a href="javascript:">Mot de passe oublié?</a>
+            </h5>
+          </div>
+          <div class="d-grid mt-4">
+            <button type="button" class="btn btn-primary-blue" (click)="login()">Se connecter</button>
+          </div>
+          <div *ngIf="erreurConnexion" class="alert alert-danger mt-2">{{ erreurConnexion }}</div>
+          <hr />
+          <h5 class="d-flex justify-content-center">
+            <a [routerLink]="['/guest/register']">Vous n’avez pas de compte ?</a>
+          </h5>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

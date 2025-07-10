@@ -1,0 +1,107 @@
+<div class="dashboard-responsable-pharmacie">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">Dashboard Responsable Pharmacie</h2>
+    <button class="btn btn-primary" (click)="ouvrirFormulaireAjout()">
+      <i class="fas fa-plus-circle me-2"></i>Ajouter un nouveau pharmacien
+    </button>
+  </div>
+
+  <div *ngIf="loading" class="alert alert-info">Chargement des utilisateurs...</div>
+  <div *ngIf="erreur" class="alert alert-danger">{{ erreur }}</div>
+
+  <div *ngIf="!loading && utilisateurs.length > 0" class="users-grid">
+    <div *ngFor="let user of utilisateurs" class="user-card">
+      <div class="user-avatar">
+        <i class="fas fa-user-md"></i>
+      </div>
+      <div class="user-info">
+        <h3 class="user-name">{{ user.nom }}</h3>
+        <p class="user-email">
+          <i class="fas fa-envelope me-2"></i>{{ user.email }}
+        </p>
+        <p class="user-phone">
+          <i class="fas fa-phone me-2"></i>{{ user.telephone || 'Non renseigné' }}
+        </p>
+      </div>
+      <div class="user-actions">
+        <button class="btn-delete" (click)="$event.stopPropagation(); supprimerUtilisateur(user.id)" title="Supprimer">
+          <i class="fas fa-trash me-1"></i> Supprimer
+        </button>
+      </div>
+    </div>
+  </div>
+  <div *ngIf="!loading && utilisateurs.length === 0 && !erreur" class="alert alert-warning">Aucun utilisateur trouvé pour cette pharmacie.</div>
+
+  <!-- Modal d'ajout de pharmacien -->
+  <div *ngIf="afficherFormulaireAjout" class="modal" [ngStyle]="{'display': 'block', 'background-color': 'rgba(0,0,0,0.5)'}">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Ajouter un nouveau pharmacien</h5>
+          <button type="button" class="btn-close" (click)="fermerFormulaireAjout()"></button>
+        </div>
+        <div class="modal-body">
+          <form (ngSubmit)="ajouterPharmacien()" #pharmacienForm="ngForm">
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="nom" class="form-label">Nom complet <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="nom" name="nom" [(ngModel)]="nouveauPharmacien.nom" required>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
+                <input type="email" class="form-control" id="email" name="email" [(ngModel)]="nouveauPharmacien.email" required>
+              </div>
+            </div>
+            
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="telephone" class="form-label">Téléphone <span class="text-danger">*</span></label>
+                <input type="tel" class="form-control" id="telephone" name="telephone" 
+                       [(ngModel)]="nouveauPharmacien.telephone" required
+                       pattern="[0-9]{8}">
+                <small class="text-muted">Format: 8 chiffres</small>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="dateNaissance" class="form-label">Date de naissance <span class="text-danger">*</span></label>
+                <input type="date" class="form-control" id="dateNaissance" name="dateNaissance" 
+                       [(ngModel)]="nouveauPharmacien.dateNaissance" required
+                       [max]="today">
+              </div>
+            </div>
+            
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="cin" class="form-label">CIN <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="cin" name="cin" 
+                       [(ngModel)]="nouveauPharmacien.cin" required>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="ville" class="form-label">Ville <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="ville" name="ville" 
+                       [(ngModel)]="nouveauPharmacien.ville" required>
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="adresse" class="form-label">Adresse complète <span class="text-danger">*</span></label>
+              <textarea class="form-control" id="adresse" name="adresse" rows="2" 
+                        [(ngModel)]="nouveauPharmacien.adresse" required></textarea>
+            </div>
+            
+            <div class="alert alert-info">
+              <i class="fas fa-info-circle me-2"></i>
+              Un mot de passe fort sera généré automatiquement et envoyé par email au pharmacien.
+            </div>
+            <div class="d-flex justify-content-end gap-2">
+              <button type="button" class="btn btn-secondary" (click)="fermerFormulaireAjout()">Annuler</button>
+              <button type="submit" class="btn btn-primary" [disabled]="!pharmacienForm.form.valid || envoiEnCours">
+                <span *ngIf="!envoiEnCours">Ajouter</span>
+                <span *ngIf="envoiEnCours" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

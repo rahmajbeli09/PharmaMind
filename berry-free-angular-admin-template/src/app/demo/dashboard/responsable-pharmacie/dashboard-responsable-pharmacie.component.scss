@@ -1,0 +1,206 @@
+.dashboard-responsable-pharmacie {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  
+  h2 {
+    color: #2c3e50;
+    font-weight: 600;
+    font-size: 1.75rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #f0f2f5;
+  }
+
+  .btn-primary, .btn-secondary {
+    padding: 0.6rem 1.5rem;
+    font-weight: 500;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-size: 0.95rem;
+    min-width: 120px;
+    text-align: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 2rem;
+    
+    i {
+      margin-right: 0.5rem;
+    }
+  }
+  
+  .btn-primary {
+    background-color: #4e73df;
+    border: none;
+    color: white;
+    
+    &:hover {
+      background-color: #3a5bd9;
+      transform: translateY(-1px);
+    }
+  }
+  
+  .btn-secondary {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    color: #6c757d;
+    
+    &:hover {
+      background-color: #e9ecef;
+      transform: translateY(-1px);
+    }
+  }
+
+  /* Style pour la grille des utilisateurs */
+  .users-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+  }
+
+  /* Style pour chaque carte utilisateur */
+  .user-card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 1px solid #f0f2f5;
+    position: relative;
+    
+    &:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  .user-avatar {
+    width: 60px;
+    height: 60px;
+    background: #f0f7ff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.2rem;
+    
+    i {
+      font-size: 1.8rem;
+      color: #4e73df;
+    }
+  }
+
+  .user-info {
+    flex: 1;
+    
+    .user-name {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #2c3e50;
+      margin: 0 0 0.8rem 0;
+    }
+    
+    .user-email, .user-phone {
+      display: flex;
+      align-items: center;
+      margin: 0.5rem 0;
+      font-size: 0.9rem;
+      color: #5a5c69;
+      
+      i {
+        color: #a0a4b8;
+        width: 20px;
+        margin-right: 0.5rem;
+        text-align: center;
+      }
+    }
+  }
+
+  .user-actions {
+    margin-top: 1.5rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid #f0f2f5;
+    display: flex;
+    justify-content: flex-end;
+    
+    .btn-delete {
+      background-color: #f8d7da;
+      border: 1px solid #f5c6cb;
+      color: #721c24;
+      cursor: pointer;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+      font-size: 0.9rem;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      
+      &:hover {
+        background-color: #f5c6cb;
+        color: #721c24;
+        transform: translateY(-1px);
+      }
+      
+      i {
+        margin-right: 0.5rem;
+      }
+    }
+  }
+
+  /* Alertes */
+  .alert {
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    padding: 1rem 1.5rem;
+    font-size: 0.95rem;
+    border: none;
+    
+    &.alert-info {
+      background-color: #f0f7ff;
+      color: #0c63e4;
+      border-left: 4px solid #4e73df;
+    }
+    
+    &.alert-danger {
+      background-color: #fdf3f2;
+      color: #d32f2f;
+      border-left: 4px solid #e74a3b;
+    }
+    
+    &.alert-warning {
+      background-color: #fff8f1;
+      color: #e6a23c;
+      border-left: 4px solid #f6c23e;
+    }
+  }
+
+  /* Styles responsifs */
+  @media (max-width: 768px) {
+    padding: 1.25rem;
+    
+    h2 {
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .users-grid {
+      grid-template-columns: 1fr;
+      gap: 1.2rem;
+    }
+    
+    .user-card {
+      padding: 1.25rem;
+    }
+  }
+  
+  @media (min-width: 1200px) {
+    .users-grid {
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    }
+  }
+}

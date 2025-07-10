@@ -1,0 +1,228 @@
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h4 class="card-title mb-0">Gestion des Médicaments</h4>
+          <div>
+            <button class="btn btn-primary me-2" (click)="openAddDialog()">
+              <i class="fas fa-plus me-1"></i> Nouveau
+            </button>
+            <button class="btn btn-outline-secondary" (click)="openImportDialog()">
+              <i class="fas fa-file-import me-1"></i> Importer
+            </button>
+          </div>
+        </div>
+
+        <!-- Search and Filter -->
+        <div class="row mb-4">
+          <div class="col-md-6">
+            <div class="input-group">
+              <span class="input-group-text"><i class="fas fa-search"></i></span>
+              <input 
+                type="text" 
+                class="form-control" 
+                placeholder="Rechercher un médicament..." 
+                [formControl]="searchControl"
+              />
+              <span *ngIf="searchControl.value" class="input-group-text" (click)="searchControl.setValue('')" style="cursor: pointer;">
+                <i class="fas fa-times"></i>
+              </span>
+            </div>
+            <small class="text-muted">Recherche par nom, catégorie, DCI ou ID</small>
+          </div>
+        </div>
+
+        <!-- Medicaments Table -->
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead class="table-light">
+              <tr>
+                <th>Nom</th>
+                <th>Dosage</th>
+                <th>Forme</th>
+                <th>Prix</th>
+                <th>Stock</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngIf="loading">
+                <td colspan="6" class="text-center">
+                  <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Chargement...</span>
+                  </div>
+                </td>
+              </tr>
+              <tr *ngFor="let medicament of rows">
+                <td>
+                  <strong>{{ medicament.name }}</strong>
+                  <div class="text-muted small">{{ medicament.dci }}</div>
+                </td>
+                <td>{{ medicament.dosage }}</td>
+                <td>{{ medicament.forme }}</td>
+                <td>{{ medicament.price | currency:'EUR':'symbol':'1.2-2' }}</td>
+                <td>
+                  <span class="badge" [ngClass]="{
+                    'bg-success': medicament.quantiteStock > 10,
+                    'bg-warning': medicament.quantiteStock > 0 && medicament.quantiteStock <= 10,
+                    'bg-danger': medicament.quantiteStock === 0
+                  }">
+                    {{ medicament.quantiteStock }}
+                  </span>
+                </td>
+                <td>
+                  <div class="btn-group" role="group">
+                    <button class="btn btn-sm btn-outline-primary me-1" (click)="openEditDialog(medicament)" ngbTooltip="Modifier">
+                      <i class="fas fa-edit me-1"></i>Modifier
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger me-1" (click)="confirmDelete(medicament)" ngbTooltip="Supprimer">
+                      <i class="fas fa-trash me-1"></i>Supprimer
+                    </button>
+                    <button class="btn btn-sm btn-outline-success" (click)="toggleQuantiteInput(medicament)" ngbTooltip="Ajouter au panier">
+                      <i class="fas fa-cart-plus me-1"></i>Panier
+                    </button>
+                  </div>
+                  
+                  <!-- Quantité input -->
+                  <div *ngIf="medicament.id !== undefined && showQuantiteInput[medicament.id]" class="input-group input-group-sm mt-2" style="width: 120px;">
+                    <input 
+                      type="number" 
+                      class="form-control" 
+                      min="1" 
+                      [max]="medicament.quantiteStock"
+                      [(ngModel)]="quantiteSelectionnee[medicament.id]"
+                      (keyup.enter)="ajouterAuPanier(medicament)"
+                    >
+                    <button class="btn btn-primary" type="button" (click)="ajouterAuPanier(medicament)">
+                      <i class="fas fa-check me-1"></i>Ajouter
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <tr *ngIf="!loading && filteredMedicaments.length === 0">
+                <td colspan="6" class="text-center">
+                  Aucun médicament trouvé.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="d-flex justify-content-between align-items-center mt-3">
+          <div class="text-muted">
+            Affichage de <b>{{ (page - 1) * pageSize + 1 }}</b> à 
+            <b>{{ page * pageSize > collectionSize ? collectionSize : page * pageSize }}</b> sur 
+            <b>{{ collectionSize }}</b> médicaments
+          </div>
+          <ngb-pagination 
+            [collectionSize]="collectionSize" 
+            [(page)]="page"
+            [pageSize]="pageSize"
+            [maxSize]="5"
+            [rotate]="true"
+            [ellipses]="false"
+            [boundaryLinks]="true"
+            (pageChange)="onPageChange($event)"
+            class="d-flex justify-content-end"
+          ></ngb-pagination>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Dialogs will be opened via the modal service -->
+
+<!-- Panier Sidebar -->
+<ng-template #panierTemplate let-offcanvas>
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title">
+      <i class="fas fa-shopping-cart me-2"></i> Panier
+    </h5>
+    <button type="button" class="btn-close" (click)="offcanvas.dismiss()" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body">
+    <div *ngIf="panier.length === 0" class="text-center py-5">
+      <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+      <p class="text-muted">Votre panier est vide</p>
+    </div>
+    <div class="table-responsive" *ngIf="panier.length > 0">
+      <table class="table table-sm">
+        <thead>
+          <tr>
+            <th>Médicament</th>
+            <th class="text-end">Qté</th>
+            <th class="text-end">Prix unitaire</th>
+            <th class="text-end">Total</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of panier">
+            <td>{{ item.medicamentName }}</td>
+            <td class="text-center">
+              <div class="btn-group btn-group-sm" role="group">
+                <button class="btn btn-outline-secondary" (click)="diminuerQuantite(item)" title="Diminuer">
+                  <i class="fas fa-minus"></i>
+                </button>
+                <span class="px-2 d-inline-flex align-items-center">{{ item.quantite }}</span>
+                <button class="btn btn-outline-secondary" (click)="augmenterQuantite(item)" title="Augmenter">
+                  <i class="fas fa-plus"></i>
+                </button>
+              </div>
+            </td>
+            <td class="text-end">{{ item.prixUnitaire | currency:'EUR':'symbol':'1.2-2' }}</td>
+            <td class="text-end">{{ (item.quantite * item.prixUnitaire) | currency:'EUR':'symbol':'1.2-2' }}</td>
+            <td class="text-end">
+              <button class="btn btn-sm btn-outline-danger" (click)="supprimerDuPanier(item.medicamentId)" title="Supprimer">
+                <i class="fas fa-trash"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="3" class="text-end fw-bold">Total :</td>
+            <td class="text-end fw-bold">{{ getTotalPanier() | currency:'EUR':'symbol':'1.2-2' }}</td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+    <div *ngIf="panier.length > 0" class="d-grid gap-2">
+      <button class="btn btn-success" (click)="validerPanier()">
+        <i class="fas fa-check-circle me-1"></i> Valider la vente ({{ getTotalPanier() | currency:'EUR':'symbol':'1.2-2' }})
+      </button>
+    </div>
+  </div>
+</ng-template>
+
+<!-- Floating Action Button for Panier -->
+<button *ngIf="panier.length > 0" class="btn btn-primary btn-floating position-fixed shadow" style="bottom: 30px; right: 30px; width: 60px; height: 60px; border-radius: 50%;" (click)="openPanier()" ngbTooltip="Voir le panier">
+  <i class="fas fa-shopping-cart fa-lg"></i>
+  <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+    {{ panier.length }}
+    <span class="visually-hidden">articles dans le panier</span>
+  </span>
+</button>
+
+<!-- Delete Confirmation Modal -->
+<ng-template #confirmDeleteModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">Confirmer la suppression</h5>
+    <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    Êtes-vous sûr de vouloir supprimer le médicament <div *ngIf="medicamentToDelete" class="modal fade show d-block" tabindex="-1">{{ medicamentToDelete?.name }}</div> ?
+    <p class="text-danger mt-2">Cette action est irréversible.</p>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline-secondary" (click)="modal.dismiss()">Annuler</button>
+    <button type="button" class="btn btn-danger" (click)="onDeleteConfirmed(); modal.close()">Supprimer</button>
+  </div>
+</ng-template>
+
+<!-- Add/Edit Medicament Dialog will be opened via the modal service -->
+<!-- Import Dialog will be opened via the modal service -->

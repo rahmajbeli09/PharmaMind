@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "pharmamindocr",
+  "private_key_id": "68d0911717c5c09c7415ef791ff81a617640fa71",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCtFyI4r8RzfKMh\nTN+V8YODsOysNGAuYVc7HDEcPEsc8gL5aaKq/vzewBmYzHOxuA9WieApC3yhYTG2\nik6DLVIJe8xralneHi8VRjb9nieul/vMpH1JahvahmvhKSGR/9AVEhFUJrzKwXjw\nvtzx8CC4ORmKxyguGYtRby1QUBtIMKPdxIQerCjiY80Pxtd2mDNiofQyT98MAp0M\naiH9WMNPuCykpufLYtXV8D5RnvWpuxW0Z30pACbpDn3Rt33S0IX21ZsLMSLDII95\nRE/A+dabyU9C1EOgAVeV2SOZbfQ6G/C+erM51idJIAYtTHEzNlkspklOMnKuJBSE\nBx/gIrFBAgMBAAECggEACXAg/BFNd3Sc2oR8DouAPc6IYS1r7yt8m6sCXIVHHTlv\nAxWI+qTzudukqanARzj/kRrsf6ByN8R6dvccp9dxSTYYY+UFKHDh5VmSRwr4I/OC\nldqEQFwKT8STnk/lVjYqLPPywPFpyu54vzvRBVowFot6gpAwdy8KYzLaOC5eBnYV\nTBagRitd/NFn1X3yNpaU1eLfCeBj0AgqXWiCNDufbrIUhc5Z/FRiVIqnV71TuJ94\nBwnjXN5eVmFFuOFb3Nu04slD8AMYHqTgMVHGbPWQwbRG3CVLNz957HWeipEiWdhu\n9gaQjGy0Jz4XSsoRjnS+XdRnEIo5duc9G4l1U2UZFwKBgQD0EeGOzN1aycFyGdow\nyZriyJSFRqgaxh7ND5MIjvkDevPzJYRsaIbnZQ7ciucgkobg5ip2x7zY3NBECfPs\nbWh7LS1yLqMcOVeprFgE0/tjGy76UgOnEEgcLHjilcPd5yGsIaYJnPTlOYKJ9sQ5\nLXI8ej3CarFQK/AKCRNK8ZPpDwKBgQC1jRCsaAFxNCapICKdrsJlzx8rT9jKJyiX\nvwZ66e1LigLI/yA0V/q5eDl4PhdmoLNIOBcZdAP/XvpE8erYH6AnQ7fL7TVdD3Zh\nwb/uUPdOxLFb5Smh3BOOTUpneIerukKHfXOD97MLsPaZ2BY3oHKi1avEZPhgbk8e\nl0ffndOgrwKBgQC5ek07RByDvgcwOs1BfjQiW+PiVIuzrRQDKe7G9j/ukSWKhdxY\ntiau+nGM0FJMwo2Vo9RpZ+jvtP7gdd/UsGBSG0cKGr8B1+Hyo3JQWPgVnLbarDDy\naMEkB/fl2YJ7xAYm1Xtkms7Q1B+L0OfVu9+wbgU5FfOhxYIpXjQ3I9cPqQKBgB98\ndZXQ+98MMmBGiHpcYq6Re1BhqrF0lR+sK42JoHPnXZBKXuV1FLCx3xWxfxF3cWBn\nCeqKKl9Rs4ndguM0qOvmXKvrWcPn+Jn/pi/IrvtkNXZAijXeGy4kzXCggLcRuJQS\n98O9Y7n1WO9ZgJDpLLh84itPb5wZxXMCvZ5Umu1VAoGBAPFMS4l8tnJ0vD14/XQ0\nF8h5qSBKq7FzygojPmAHnFPRT/svg4TTQOmWnmnN3RJR2i9TK2/cM3God04nR6Vk\ngc8i3JWwcxuf1juvlbl4eNPnBbtMX89Y9GAWE5XGqllkRr4T1ZlfZJGs8Bpw4Dqi\nwMnhEhgeeccjYauyvK22JEVE\n-----END PRIVATE KEY-----\n",
+  "client_email": "pharmamindocr-386@pharmamindocr.iam.gserviceaccount.com",
+  "client_id": "111361377164335389736",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/pharmamindocr-386%40pharmamindocr.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

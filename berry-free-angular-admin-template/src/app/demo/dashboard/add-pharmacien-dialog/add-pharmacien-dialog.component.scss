@@ -1,0 +1,21 @@
+// Styles spécifiques au formulaire d'ajout de pharmacien
+.pharmacien-form {
+  min-width: 300px;
+  max-width: 500px;
+  width: 100%;
+  
+  .mat-form-field {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+  
+  .mat-dialog-actions {
+    padding: 16px 0 0 0;
+    justify-content: flex-end;
+  }
+  
+  button[mat-button],
+  button[mat-raised-button] {
+    margin-left: 8px;
+  }
+}

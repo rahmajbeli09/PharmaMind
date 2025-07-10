@@ -1,0 +1,125 @@
+@import '../register/register.component.scss';
+
+$primary-blue: #1976d2;
+
+body {
+  background: #f6f8fb;
+}
+
+.register-form {
+  max-width: 540px;
+  margin: 2rem auto;
+  padding: 2.5rem 2rem;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+}
+
+.auth-header {
+  margin-bottom: 2rem;
+  h2 {
+    font-size: 2.1rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: $primary-blue;
+  }
+  p {
+    font-size: 1.1rem;
+    color: #6c757d;
+    margin-top: 0.5rem;
+  }
+}
+
+.progress {
+  height: 10px;
+  background: #e9ecef;
+  border-radius: 6px;
+  .progress-bar {
+    background: $primary-blue;
+    transition: width 0.4s cubic-bezier(.4,0,.2,1);
+    border-radius: 6px;
+  }
+}
+
+.form-group label {
+  font-weight: 500;
+  color: #495057;
+  margin-bottom: 0.5rem;
+}
+
+.form-control {
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-shadow: none;
+  &:focus {
+    border-color: $primary-blue;
+    box-shadow: 0 0 0 2px rgba(25,118,210,0.12);
+    outline: none;
+  }
+}
+
+.btn {
+  border-radius: 6px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+.btn-primary {
+  background: $primary-blue;
+  border: none;
+  color: #fff;
+  &:hover, &:focus {
+    background: darken($primary-blue, 7%);
+    box-shadow: 0 2px 8px rgba(25,118,210,0.10);
+  }
+}
+.btn-success {
+  background: linear-gradient(90deg, #1abc9c 0%, #16a085 100%);
+  border: none;
+  &:hover, &:focus {
+    background: linear-gradient(90deg, #16a085 0%, #149174 100%);
+    box-shadow: 0 2px 8px rgba(22,160,133,0.10);
+  }
+}
+.btn-secondary {
+  background: #e9ecef;
+  color: $primary-blue;
+  border: none;
+  &:hover, &:focus {
+    background: #dee2e6;
+    color: darken($primary-blue, 7%);
+  }
+}
+
+.btn-block {
+  width: 100%;
+}
+
+/* Code de vérification */
+.d-flex.justify-content-center.mb-3 input[type="text"] {
+  font-size: 2rem;
+  width: 54px;
+  height: 54px;
+  margin: 0 0.25rem;
+  border-radius: 8px;
+  border: 1.5px solid #d1d5db;
+  text-align: center;
+  background: #f8f9fa;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.d-flex.justify-content-center.mb-3 input[type="text"]:focus {
+  border-color: $primary-blue;
+  box-shadow: 0 0 0 2px rgba(25,118,210,0.12);
+  background: #fff;
+}
+
+@media (max-width: 767px) {
+  .register-form {
+    padding: 1.25rem 0.5rem;
+    max-width: 100vw;
+  }
+  .auth-header h2 {
+    font-size: 1.4rem;
+  }
+}

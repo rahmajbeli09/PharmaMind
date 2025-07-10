@@ -1,0 +1,92 @@
+<!-- Navbar -->
+<nav class="navbar">
+  <div class="navbar-logo">
+    <img src="assets/images/logo.png" alt="PharmaMind Logo" height="40">
+  </div>
+  <ul class="navbar-links">
+    <li><a href="/home">Accueil</a></li>
+    <li><a href="#about">À propos</a></li>
+    <li><a href="#services">Services</a></li>
+    <li><a href="/login" routerLink="/login">Connexion</a></li>
+    <li class="dropdown">
+  <a href="#" class="dropdown-toggle" (mouseenter)="showDropdown=true" (mouseleave)="showDropdown=false" (click)="$event.preventDefault(); showDropdown=!showDropdown" [class.open]="showDropdown">Inscription</a>
+  <ul class="dropdown-menu" [style.display]="showDropdown ? 'block' : 'none'" (mouseenter)="showDropdown=true" (mouseleave)="showDropdown=false">
+    <li><a class="dropdown-item" [routerLink]="'/register-pharmacien'" (click)="showDropdown=false">Pharmacien</a></li>
+  </ul>
+</li>
+  </ul>
+</nav>
+
+<!-- Hero Section -->
+<header class="hero-section">
+  <div class="hero-bg"></div>
+  <div class="hero-content">
+    <h1>Bienvenue sur <span class="highlight">PharmaMind</span>, votre assistant pharmaceutique intelligent</h1>
+    <h2>Simplifiez la gestion de votre pharmacie. Recherchez, gérez, scannez.</h2>
+    
+  </div>
+</header>
+<div class="presentation-row">
+  <p class="presentation">
+    PharmaMind est une plateforme moderne dédiée à la gestion intelligente des pharmacies en Tunisie.<br>
+    Elle permet aux pharmaciens de gérer leur stock, leurs ventes et les ordonnances.<br>
+    Les citoyens peuvent facilement localiser un médicament dans les pharmacies environnantes.<br>
+    Grâce à un système d'inscription sécurisé et une reconnaissance automatique d’ordonnances, PharmaMind modernise tout l'écosystème.
+  </p>
+  <img src="assets/images/logo.png" alt="PharmaMind Logo" class="presentation-logo">
+</div>
+<!-- Services Section -->
+<section id="services" class="services-section">
+  <h3>Nos services</h3>
+  <div class="services-cards">
+  <div class="service-card">
+    <img src="assets/images/stock.jpg" alt="Gestion de stock" class="service-img">
+    <h4>Gestion intelligente des stocks<br></h4>
+    <br>
+    <div class="service-desc">
+      Ajoutez, modifiez et suivez les médicaments facilement. Recevez des alertes en cas de stock faible et automatisez la mise à jour après chaque vente pour une gestion optimale et précise.
+    </div>
+  </div>
+  <div class="service-card">
+    <img src="assets/images/recherche.jpg" alt="Recherche intelligente" class="service-img">
+    <h4>Recherche intelligente de médicaments</h4>
+    <div class="service-desc">
+      Accédez rapidement aux informations sur un médicament et découvrez dans quelles pharmacies il est disponible, avec adresse, horaires d’ouverture et état du stock mis à jour en temps réel.
+    </div>
+  </div>
+  <div class="service-card">
+    <img src="assets/images/scan.jpg" alt="Scan ordonnance" class="service-img">
+    <h4>Scan et traitement des ordonnances</h4>
+    <div class="service-desc">
+      Scannez les ordonnances médicales pour extraire automatiquement les noms des médicaments et leur posologie. Gagnez du temps, évitez les erreurs et simplifiez le traitement des prescriptions.
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="footer-contact">
+    <h5>Contact :</h5>
+    <p>📍 10 rue des pharmaciens, Tunis, Tunisie</p>
+    <p>📧 contact&#64;pharmamind.tn</p>
+    <p>📞 +216 70 000 000</p>
+  </div>
+  <div class="footer-links">
+    <h5>Liens utiles :</h5>
+    <ul>
+      <li><a href="#">Mentions légales</a></li>
+      <li><a href="#">Politique de confidentialité</a></li>
+      <li><a href="#">Aide / FAQ</a></li>
+      <li><a href="#">Conditions d’utilisation</a></li>
+    </ul>
+  </div>
+  <div class="footer-social">
+    <h5>Suivez-nous :</h5>
+    <div class="social-icons">
+      <a href="#" title="Facebook">🌐 Facebook</a> |
+      <a href="#" title="Twitter">Twitter</a> |
+      <a href="#" title="LinkedIn">LinkedIn</a>
+    </div>
+  </div>
+</footer>

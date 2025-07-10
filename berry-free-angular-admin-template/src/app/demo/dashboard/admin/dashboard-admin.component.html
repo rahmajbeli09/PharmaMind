@@ -1,0 +1,127 @@
+<div class="dashboard-admin">
+
+  <div *ngIf="succes" class="alert alert-success-custom d-flex align-items-center" role="alert">
+    <i class="bi bi-check-circle-fill me-2"></i>
+    {{ succes }}
+  </div>
+  <div *ngIf="erreur" class="alert alert-danger-custom d-flex align-items-center" role="alert">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+    {{ erreur }}
+  </div>
+  <div *ngIf="loading" class="my-4 text-center">
+    <span>Chargement des utilisateurs inactifs...</span>
+  </div>
+
+  <div *ngIf="!loading && utilisateursInactifs.length > 0">
+    <div class="admin-banner-premium">
+      Bienvenue sur l’espace de gestion des demandes d’inscription.<br> Ici, vous pouvez examiner, valider ou refuser les nouvelles inscriptions des pharmaciens.
+    </div>
+    
+    <table class="table table-bordered table-striped mt-3">
+      <thead>
+        <tr>
+          <th>Nom</th>
+          <th>Email</th>
+          <th>Pharmacie associée</th>
+          <th>Détail</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let user of utilisateursInactifs; let i = index">
+          <td>{{ user.nom }}</td>
+          <td>{{ user.email }}</td>
+          <td>{{ user.pharmacie?.nom || '-' }}</td>
+          <td>
+            <button class="btn btn-info btn-sm" (click)="afficherDetail(user)">Détail</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Détail utilisateur (modale simple) -->
+    <div *ngIf="showDetail && selectedUser" class="modal-backdrop-custom" (click)="fermerDetail()">
+      <div class="modal-custom" (click)="$event.stopPropagation()">
+        <h4>Détails de l'utilisateur</h4>
+        <ul>
+          <li><b class="attribut-label">Nom :</b> {{ selectedUser.nom }}</li>
+          <li><b class="attribut-label">Email :</b> {{ selectedUser.email }}</li>
+          <li><b class="attribut-label">Adresse :</b> {{ selectedUser.adresse || selectedUser.contact?.adresse || '-' }}</li>
+          <li><b class="attribut-label">Téléphone :</b> {{ selectedUser.telephone || selectedUser.contact?.telephone || '-' }}</li>
+          <li><b class="attribut-label">Ville :</b> {{ selectedUser.ville }}</li>
+          <li><b class="attribut-label">Rôle :</b> {{ selectedUser.role }}</li>
+          <li><b class="attribut-label">Active :</b> {{ selectedUser.isActive ? 'Oui' : 'Non' }}</li>
+        </ul>
+        <h5 class="mt-3">Pharmacie associée</h5>
+        <ul *ngIf="selectedUser.pharmacie">
+          <li><b>Nom :</b> {{ selectedUser.pharmacie.nom }}</li>
+          <li><b>Adresse :</b> {{ selectedUser.pharmacie.adresse }}</li>
+          <li><b>Ville :</b> {{ selectedUser.pharmacie.ville }}</li>
+          <li><b>Gouvernorat :</b> {{ selectedUser.pharmacie.gouvernorat }}</li>
+          <li><b>Téléphone :</b> {{ selectedUser.pharmacie.telephone }}</li>
+        </ul>
+        <div *ngIf="selectedUser.pharmacie">
+          <h6 class="mt-3">Documents (images)</h6>
+          <div class="d-flex flex-wrap gap-3">
+            <div *ngIf="selectedUser.pharmacie.id">
+              <span>Diplôme : </span>
+                <img *ngIf="selectedUser.pharmacie?.diplome" 
+                [src]="'data:image/png;base64,' + selectedUser.pharmacie.diplome" 
+                alt="Diplôme"
+                style="width: 80px; height: 80px; object-fit: cover; border:1px solid #ccc; border-radius:4px; cursor: pointer;"
+                (click)="ouvrirImagePreview('data:image/png;base64,' + selectedUser.pharmacie.diplome)" />
+            </div>
+            <div *ngIf="selectedUser.pharmacie.id">
+              <span>Autorisation : </span>
+                <img *ngIf="selectedUser.pharmacie?.carte" 
+                [src]="'data:image/png;base64,' + selectedUser.pharmacie.carte" 
+                alt="Carte"
+                style="width: 80px; height: 80px; object-fit: cover; border:1px solid #ccc; border-radius:4px; cursor: pointer;"
+                (click)="ouvrirImagePreview('data:image/png;base64,' + selectedUser.pharmacie.carte)" />
+            </div>
+            <div *ngIf="selectedUser.pharmacie.id">
+              <span>Carte : </span>
+                <img *ngIf="selectedUser.pharmacie?.autorisation" 
+                [src]="'data:image/png;base64,' + selectedUser.pharmacie.autorisation" 
+                alt="Autorisation"
+                style="width: 80px; height: 80px; object-fit: cover; border:1px solid #ccc; border-radius:4px; cursor: pointer;"
+                (click)="ouvrirImagePreview('data:image/png;base64,' + selectedUser.pharmacie.autorisation)" />
+            </div>
+          </div>
+        </div>
+        <div class="d-flex gap-3 mt-3" style="justify-content: flex-end;">
+          <button class="btn btn-success" (click)="accepterUtilisateur(selectedUser)"><i class="material-icons" style="font-size:1.1rem;vertical-align:middle;"></i> Accepter</button>
+          <button class="btn btn-danger" (click)="refuserUtilisateur(selectedUser)"><i class="material-icons" style="font-size:1.1rem;vertical-align:middle;"></i> Refuser</button>
+        </div>
+
+        <!-- Modale d'aperçu d'image -->
+        <div *ngIf="showImagePreview" class="modal-backdrop-custom" (click)="fermerImagePreview()">
+          <div class="modal-custom" style="max-width: 90vw; max-height: 90vh; display: flex; flex-direction: column; align-items: center;" (click)="$event.stopPropagation()">
+            <img [src]="imagePreviewSrc" alt="Aperçu image" style="max-width: 80vw; max-height: 70vh; border-radius: 8px; border: 2px solid #888; margin-bottom: 1rem;" />
+          </div>
+        </div>
+      </div>
+    </div>
+    <style>
+      .modal-backdrop-custom {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.4);
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .modal-custom {
+        background: #fff;
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        min-width: 320px;
+        max-width: 90vw;
+      }
+    </style>
+  </div>
+  <div *ngIf="!loading && utilisateursInactifs.length === 0">
+    <p>Aucun utilisateur inactif trouvé.</p>
+  </div>
+</div>

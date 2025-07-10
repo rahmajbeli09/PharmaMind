@@ -1,0 +1,106 @@
+.dialog {
+  position: relative;
+  background: #fff;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  max-width: 800px;
+  width: 100%;
+  margin: 2rem auto;
+  
+  h2 {
+    color: #2c3e50;
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+  }
+  
+  .close-btn {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #6c757d;
+    transition: color 0.2s;
+    
+    &:hover {
+      color: #2c3e50;
+    }
+  }
+  
+  .success-message {
+    display: flex;
+    align-items: center;
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    padding: 0.75rem 1.25rem;
+    margin-bottom: 1.5rem;
+    border-radius: 6px;
+    
+    i {
+      margin-right: 0.5rem;
+      font-size: 1.25rem;
+    }
+  }
+  
+  .error-message {
+    display: flex;
+    align-items: center;
+    background-color: #ffebee;
+    color: #c62828;
+    padding: 0.75rem 1.25rem;
+    margin-bottom: 1.5rem;
+    border-radius: 6px;
+    
+    i {
+      margin-right: 0.5rem;
+      font-size: 1.25rem;
+    }
+  }
+  
+  .form-label {
+    font-weight: 500;
+    color: #495057;
+    margin-bottom: 0.5rem;
+  }
+  
+  .form-control, .form-select {
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #ced4da;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    
+    &:focus {
+      border-color: #3f51b5;
+      box-shadow: 0 0 0 0.2rem rgba(63, 81, 181, 0.25);
+    }
+  }
+  
+  .btn-primary {
+    padding: 0.5rem 1.5rem;
+    border-radius: 6px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    
+    i {
+      margin-right: 0.5rem;
+    }
+  }
+  
+  .btn:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+  }
+  
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  
+  .ti-loader {
+    animation: spin 1s linear infinite;
+  }
+}
