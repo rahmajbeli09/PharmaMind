@@ -3,6 +3,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { InscriptionAdminPharmacieService, PharmacienRequest } from 'src/app/services/inscription-admin-pharmacie.service';
+import { TicketCaisseService } from 'src/app/services/ticket-caisse.service';
+import { LeafletModule } from '@asymmetrik/ngx-leaflet';
+import * as L from 'leaflet';
 
 interface NouveauPharmacien {
   nom: string;
@@ -20,14 +23,57 @@ interface NouveauPharmacien {
 @Component({
   selector: 'app-dashboard-responsable-pharmacie',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, LeafletModule],
   templateUrl: './dashboard-responsable-pharmacie.component.html',
-  styleUrls: ['./dashboard-responsable-pharmacie.component.scss']
+  styleUrls: [
+    './dashboard-responsable-pharmacie.component.scss',
+    './map-styles.scss'
+  ]
 })
 export class DashboardResponsablePharmacieComponent implements OnInit {
   utilisateurs: any[] = [];
   loading = false;
   erreur: string | null = null;
+  showLocationPrompt = false;
+  showMap = false;
+  pharmacie: any = null;
+  
+  // Référence à la carte
+  private map: L.Map | null = null;
+  marker: L.Marker | null = null;
+  selectedLatitude: number = 0;
+  selectedLongitude: number = 0;
+  isSaving = false;
+  
+  // Configuration des couches et contrôles de la carte
+  layers: L.Layer[] = [];
+  layersControl = {
+    baseLayers: {
+      'OpenStreetMap': L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      }),
+      'Satellite': L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 19,
+        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+      })
+    },
+    overlays: {}
+  };
+  
+  // Options de la carte
+  mapOptions: L.MapOptions = {
+    layers: [this.layersControl.baseLayers['OpenStreetMap']],
+    zoom: 13,
+    center: L.latLng(36.8065, 10.1815) // Centre sur Tunis par défaut
+  };
+
+  constructor(
+    private inscriptionService: InscriptionAdminPharmacieService,
+    private ticketCaisseService: TicketCaisseService,
+    private router: Router
+  ) { }
+
   afficherFormulaireAjout = false;
   envoiEnCours = false;
   nouveauPharmacien: NouveauPharmacien = {
@@ -44,10 +90,7 @@ export class DashboardResponsablePharmacieComponent implements OnInit {
   };
   today = new Date().toISOString().split('T')[0]; // Pour la validation de la date de naissance
 
-  constructor(
-    private inscriptionService: InscriptionAdminPharmacieService,
-    private router: Router
-  ) { }
+
 
   // Afficher le formulaire d'ajout
   ouvrirFormulaireAjout() {
@@ -332,7 +375,169 @@ export class DashboardResponsablePharmacieComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Charger les utilisateurs au démarrage du composant
+    console.log('Initialisation du composant DashboardResponsablePharmacieComponent');
     this.chargerUtilisateurs();
+    this.verifierLocalisationPharmacie();
+  }
+
+  verifierLocalisationPharmacie() {
+    console.log('Vérification des coordonnées de la pharmacie...');
+    const userId = this.ticketCaisseService.getCurrentUserId();
+    console.log('ID utilisateur:', userId);
+    
+    if (userId) {
+      this.inscriptionService.verifierCoordonneesNulles(userId).subscribe({
+        next: (sontNulles) => {
+          console.log('Les coordonnées sont nulles?', sontNulles);
+          this.showLocationPrompt = sontNulles;
+          
+          if (sontNulles) {
+            console.log('Affichage de la bannière de localisation manquante');
+          } else {
+            console.log('Les coordonnées GPS sont déjà définies');
+          }
+        },
+        error: (error) => {
+          console.error('Erreur lors de la vérification des coordonnées de la pharmacie', error);
+          // En cas d'erreur, on n'affiche pas la bannière pour ne pas gêner l'utilisateur
+          this.showLocationPrompt = false;
+        }
+      });
+    } else {
+      console.warn('Aucun ID utilisateur trouvé');
+      this.showLocationPrompt = false;
+    }
+  }
+
+  onMapReady(map: L.Map): void {
+    this.map = map;
+    
+    // Désactiver le zoom avec la molette de la souris
+    this.map.scrollWheelZoom.disable();
+    
+    // Définir les chemins des icônes
+    const iconRetina = 'assets/leaflet/images/marker-icon-2x.png';
+    const iconUrl = 'assets/leaflet/images/marker-icon.png';
+    const shadowUrl = 'assets/leaflet/images/marker-shadow.png';
+    
+    // Configurer l'icône par défaut
+    const iconDefault = L.icon({
+      iconRetinaUrl: iconRetina,
+      iconUrl: iconUrl,
+      shadowUrl: shadowUrl,
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      shadowSize: [41, 41]
+    });
+    
+    // Définir l'icône par défaut pour tous les marqueurs
+    (L.Marker.prototype as any).options.icon = iconDefault;
+    
+    // Ajouter un gestionnaire d'événements pour les clics sur la carte
+    this.map.on('click', (e: L.LeafletMouseEvent) => this.onMapClick(e));
+  }
+
+  onMapClick(event: L.LeafletMouseEvent): void {
+    if (!this.map) return;
+    
+    const lat = event.latlng.lat;
+    const lng = event.latlng.lng;
+    this.selectedLatitude = lat;
+    this.selectedLongitude = lng;
+    
+    if (!this.marker) {
+      this.marker = L.marker([lat, lng], {
+        draggable: true,
+        icon: L.icon({
+          iconUrl: 'assets/leaflet/images/marker-icon.png',
+          shadowUrl: 'assets/leaflet/images/marker-shadow.png',
+          iconSize: [25, 41],
+          iconAnchor: [12, 41],
+          popupAnchor: [1, -34],
+          shadowSize: [41, 41]
+        })
+      }).addTo(this.map);
+      
+      this.marker.on('dragend', () => {
+        if (this.marker) {
+          const position = this.marker.getLatLng();
+          this.selectedLatitude = position.lat;
+          this.selectedLongitude = position.lng;
+        }
+      });
+    } else {
+      this.marker.setLatLng([lat, lng]);
+    }
+    
+    this.map.setView([lat, lng], this.map.getZoom());
+  }
+  
+  ajouterEmplacement() {
+    console.log('Affichage de la carte pour la sélection de l\'emplacement');
+    this.showMap = true;
+    this.showLocationPrompt = false;
+  }
+  
+  enregistrerLocalisation() {
+    if (this.selectedLatitude === 0 && this.selectedLongitude === 0) {
+      return;
+    }
+
+    this.isSaving = true;
+    
+    // Afficher toutes les clés du localStorage pour le débogage
+    console.log('Clés du localStorage:', Object.keys(localStorage));
+    
+    // Essayer différentes clés de token possibles
+    const token = localStorage.getItem('authToken') || 
+                 localStorage.getItem('token') ||
+                 localStorage.getItem('jwt');
+    
+    console.log('Token récupéré:', token);
+    
+    if (!token) {
+      console.error('Aucun token d\'authentification trouvé dans le localStorage');
+      console.log('Contenu complet du localStorage:', localStorage);
+      this.isSaving = false;
+      return;
+    }
+
+    // Décoder le token pour obtenir l'ID de la pharmacie
+    try {
+      const tokenPayload = JSON.parse(atob(token.split('.')[1]));
+      const pharmacieId = tokenPayload.pharmacie_id;
+      
+      if (!pharmacieId) {
+        console.error('Aucun ID de pharmacie trouvé dans le token');
+        this.isSaving = false;
+        return;
+      }
+
+      console.log('Mise à jour de la localisation pour la pharmacie ID:', pharmacieId);
+      
+      // Mettre à jour la localisation directement avec l'ID de la pharmacie
+      this.inscriptionService.updateLocalisation(
+        pharmacieId,
+        this.selectedLatitude,
+        this.selectedLongitude
+      ).subscribe({
+        next: (updatedPharmacie) => {
+          console.log('Localisation mise à jour avec succès', updatedPharmacie);
+          this.showMap = false;
+          this.showLocationPrompt = false;
+          // Recharger les données de la pharmacie si nécessaire
+        },
+        error: (error) => {
+          console.error('Erreur lors de la mise à jour de la localisation', error);
+        }
+      }).add(() => {
+        this.isSaving = false;
+      });
+      
+    } catch (error) {
+      console.error('Erreur lors du décodage du token', error);
+      this.isSaving = false;
+    }
   }
 }

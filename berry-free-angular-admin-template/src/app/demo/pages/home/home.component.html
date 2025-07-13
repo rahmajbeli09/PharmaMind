@@ -1,92 +1,209 @@
 <!-- Navbar -->
-<nav class="navbar">
+<nav class="navbar" [class.scrolled]="isScrolled" (window:scroll)="onWindowScroll()">
   <div class="navbar-logo">
-    <img src="assets/images/logo.png" alt="PharmaMind Logo" height="40">
+    <a href="/home">
+      <img src="/assets/images/logo.png" alt="PharmaMind Logo">
+    </a>
   </div>
   <ul class="navbar-links">
-    <li><a href="/home">Accueil</a></li>
-    <li><a href="#about">À propos</a></li>
-    <li><a href="#services">Services</a></li>
-    <li><a href="/login" routerLink="/login">Connexion</a></li>
-    <li class="dropdown">
-  <a href="#" class="dropdown-toggle" (mouseenter)="showDropdown=true" (mouseleave)="showDropdown=false" (click)="$event.preventDefault(); showDropdown=!showDropdown" [class.open]="showDropdown">Inscription</a>
-  <ul class="dropdown-menu" [style.display]="showDropdown ? 'block' : 'none'" (mouseenter)="showDropdown=true" (mouseleave)="showDropdown=false">
-    <li><a class="dropdown-item" [routerLink]="'/register-pharmacien'" (click)="showDropdown=false">Pharmacien</a></li>
-  </ul>
-</li>
+    <li><a href="#" (click)="scrollTo('top'); $event.preventDefault()" [class.active]="activeSection === 'top'">Accueil</a></li>
+    <li><a href="#about" (click)="scrollTo('about'); $event.preventDefault()" [class.active]="activeSection === 'about'">À propos</a></li>
+    <li><a href="#services" (click)="scrollTo('services'); $event.preventDefault()" [class.active]="activeSection === 'services'">Services</a></li>
+    <li><a href="/login" class="btn btn-outline">Connexion</a></li>
+    <li class="dropdown" (mouseenter)="showDropdown = true" (mouseleave)="showDropdown = false">
+      <a href="#" class="dropdown-toggle" (click)="$event.preventDefault()">
+        Inscription
+        <i class="fas fa-chevron-down"></i>
+      </a>
+      <ul class="dropdown-menu" [class.show]="showDropdown">
+        <li><a class="dropdown-item" [routerLink]="'/register-pharmacien'" (click)="showDropdown = false">Pharmacien</a></li>
+      </ul>
+    </li>
   </ul>
 </nav>
 
 <!-- Hero Section -->
-<header class="hero-section">
+<header id="top" class="hero-section">
   <div class="hero-bg"></div>
   <div class="hero-content">
-    <h1>Bienvenue sur <span class="highlight">PharmaMind</span>, votre assistant pharmaceutique intelligent</h1>
+    <h1>Bienvenue sur <span class="highlight">PharmaMind</span><br>Votre assistant pharmaceutique intelligent</h1>
     <h2>Simplifiez la gestion de votre pharmacie. Recherchez, gérez, scannez.</h2>
-    
   </div>
 </header>
-<div class="presentation-row">
-  <p class="presentation">
-    PharmaMind est une plateforme moderne dédiée à la gestion intelligente des pharmacies en Tunisie.<br>
-    Elle permet aux pharmaciens de gérer leur stock, leurs ventes et les ordonnances.<br>
-    Les citoyens peuvent facilement localiser un médicament dans les pharmacies environnantes.<br>
-    Grâce à un système d'inscription sécurisé et une reconnaissance automatique d’ordonnances, PharmaMind modernise tout l'écosystème.
-  </p>
-  <img src="assets/images/logo.png" alt="PharmaMind Logo" class="presentation-logo">
-</div>
+
+<!-- Search Section -->
+<section class="search-section">
+  <div class="search-container">
+    <div class="search-card">
+      <h3>Trouvez votre médicament</h3>
+      <p>Recherchez par nom de médicament, principe actif ou code CIP</p>
+      
+      <form class="search-form" (ngSubmit)="onSearch()" #searchForm="ngForm">
+        <div class="search-input-group">
+          <div class="search-icon">
+            <i class="fas fa-search"></i>
+          </div>
+          <input 
+            type="text" 
+            name="searchQuery" 
+            [(ngModel)]="searchQuery"
+            placeholder="Entrez le nom d'un médicament..." 
+            class="search-input"
+            required>
+          <button type="submit" class="search-button">
+            <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+        
+        <div class="search-filters">
+          <div class="filter-option">
+            <input type="checkbox" id="inStock" name="inStock" [(ngModel)]="filters.inStock">
+            <label for="inStock">En stock uniquement</label>
+          </div>
+          
+          <div class="filter-option">
+            <input type="checkbox" id="nearMe" name="nearMe" [(ngModel)]="filters.nearMe">
+            <label for="nearMe">Proche de moi</label>
+          </div>
+          
+          <div class="filter-option">
+            <select id="distance" name="distance" [(ngModel)]="filters.distance" class="distance-select">
+              <option value="5">Dans un rayon de 5 km</option>
+              <option value="10">Dans un rayon de 10 km</option>
+              <option value="20">Dans un rayon de 20 km</option>
+              <option value="50">Dans un rayon de 50 km</option>
+            </select>
+          </div>
+        </div>
+      </form>
+      
+      <div class="popular-searches">
+        <span>Recherches populaires :</span>
+        <a href="#" (click)="setSearchQuery('Doliprane')">Doliprane</a>
+        <a href="#" (click)="setSearchQuery('Spasfon')">Spasfon</a>
+        <a href="#" (click)="setSearchQuery('Efferalgan')">Efferalgan</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- About Section -->
+<section id="about" class="about-section">
+  <div class="about-content">
+    <h2>À propos de PharmaMind</h2>
+    <div class="about-grid">
+      <div class="about-text">
+        <p>PharmaMind est une plateforme moderne dédiée à la gestion intelligente des pharmacies en Tunisie. Notre solution complète permet aux pharmaciens de gérer efficacement leur stock, leurs ventes et le traitement des ordonnances.</p>
+        <p>Avec notre système de géolocalisation avancé, les citoyens peuvent facilement trouver les médicaments disponibles dans les pharmacies à proximité, avec des informations en temps réel sur les stocks et les horaires d'ouverture.</p>
+        <p>Notre technologie de reconnaissance d'ordonnances médicales permet de gagner un temps précieux et de réduire les erreurs de saisie, tout en offrant une expérience utilisateur intuitive et sécurisée.</p>
+      </div>
+      <div class="about-image">
+        <img src="/assets/images/background.jpg" alt="Intérieur de pharmacie moderne">
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- Services Section -->
 <section id="services" class="services-section">
-  <h3>Nos services</h3>
-  <div class="services-cards">
-  <div class="service-card">
-    <img src="assets/images/stock.jpg" alt="Gestion de stock" class="service-img">
-    <h4>Gestion intelligente des stocks<br></h4>
-    <br>
-    <div class="service-desc">
-      Ajoutez, modifiez et suivez les médicaments facilement. Recevez des alertes en cas de stock faible et automatisez la mise à jour après chaque vente pour une gestion optimale et précise.
+  <div class="section-header">
+    <h2>Nos Services</h2>
+    <p>Découvrez comment PharmaMind peut transformer la gestion de votre pharmacie avec nos solutions innovantes</p>
+  </div>
+  
+  <div class="services-grid">
+    <!-- Service 1 -->
+    <div class="service-card">
+      <div class="service-image">
+        <img src="/assets/images/stock.jpg" alt="Gestion de stock">
+      </div>
+      <div class="service-content">
+        <h3>Gestion intelligente des stocks</h3>
+        <p>Optimisez la gestion de votre inventaire avec notre système intelligent qui suit en temps réel les entrées et sorties de produits, génère des alertes de stock faible et suggère des commandes.</p>
+        <a href="#" class="service-link">En savoir plus <i class="fas fa-arrow-right"></i></a>
+      </div>
+    </div>
+    
+    <!-- Service 2 -->
+    <div class="service-card">
+      <div class="service-image">
+        <img src="/assets/images/recherche.jpg" alt="Recherche de médicaments">
+      </div>
+      <div class="service-content">
+        <h3>Recherche de médicaments</h3>
+        <p>Trouvez rapidement n'importe quel médicament dans les pharmacies environnantes avec notre moteur de recherche avancé et notre système de géolocalisation en temps réel.</p>
+        <a href="#" class="service-link">En savoir plus <i class="fas fa-arrow-right"></i></a>
+      </div>
+    </div>
+    
+    <!-- Service 3 -->
+    <div class="service-card">
+      <div class="service-image">
+        <img src="/assets/images/scan.jpg" alt="Scan d'ordonnance">
+      </div>
+      <div class="service-content">
+        <h3>Scan d'ordonnance</h3>
+        <p>Numérisez et traitez les ordonnances médicales en quelques secondes avec notre technologie de reconnaissance optique de caractères (OCR) avancée.</p>
+        <a href="#" class="service-link">En savoir plus <i class="fas fa-arrow-right"></i></a>
+      </div>
     </div>
   </div>
-  <div class="service-card">
-    <img src="assets/images/recherche.jpg" alt="Recherche intelligente" class="service-img">
-    <h4>Recherche intelligente de médicaments</h4>
-    <div class="service-desc">
-      Accédez rapidement aux informations sur un médicament et découvrez dans quelles pharmacies il est disponible, avec adresse, horaires d’ouverture et état du stock mis à jour en temps réel.
-    </div>
-  </div>
-  <div class="service-card">
-    <img src="assets/images/scan.jpg" alt="Scan ordonnance" class="service-img">
-    <h4>Scan et traitement des ordonnances</h4>
-    <div class="service-desc">
-      Scannez les ordonnances médicales pour extraire automatiquement les noms des médicaments et leur posologie. Gagnez du temps, évitez les erreurs et simplifiez le traitement des prescriptions.
-    </div>
-  </div>
-</div>
 </section>
 
 <!-- Footer -->
 <footer class="footer">
-  <div class="footer-contact">
-    <h5>Contact :</h5>
-    <p>📍 10 rue des pharmaciens, Tunis, Tunisie</p>
-    <p>📧 contact&#64;pharmamind.tn</p>
-    <p>📞 +216 70 000 000</p>
-  </div>
-  <div class="footer-links">
-    <h5>Liens utiles :</h5>
-    <ul>
-      <li><a href="#">Mentions légales</a></li>
-      <li><a href="#">Politique de confidentialité</a></li>
-      <li><a href="#">Aide / FAQ</a></li>
-      <li><a href="#">Conditions d’utilisation</a></li>
-    </ul>
-  </div>
-  <div class="footer-social">
-    <h5>Suivez-nous :</h5>
-    <div class="social-icons">
-      <a href="#" title="Facebook">🌐 Facebook</a> |
-      <a href="#" title="Twitter">Twitter</a> |
-      <a href="#" title="LinkedIn">LinkedIn</a>
+  <div class="footer-content">
+    <div class="footer-column">
+      <div class="footer-logo">
+        <img src="/assets/images/logo.png" alt="PharmaMind Logo" width="180" style="filter: brightness(0) invert(1);">
+      </div>
+      <p style="margin-top: 1.5rem; color: rgba(255, 255, 255, 0.8);">
+        Votre partenaire de confiance pour une gestion pharmaceutique moderne et efficace en Tunisie.
+      </p>
+      <div class="social-links">
+        <a href="#" class="social-link" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+        <a href="#" class="social-link" title="Twitter"><i class="fab fa-twitter"></i></a>
+        <a href="#" class="social-link" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+        <a href="#" class="social-link" title="Instagram"><i class="fab fa-instagram"></i></a>
+      </div>
     </div>
+    
+    <div class="footer-column">
+      <h4>Liens rapides</h4>
+      <ul class="footer-links">
+        <li><a href="/home">Accueil</a></li>
+        <li><a href="#about">À propos</a></li>
+        <li><a href="#services">Services</a></li>
+        <li><a href="#">Fonctionnalités</a></li>
+        <li><a href="#">Tarifs</a></li>
+        <li><a href="#">Blog</a></li>
+      </ul>
+    </div>
+    
+    <div class="footer-column">
+      <h4>Services</h4>
+      <ul class="footer-links">
+        <li><a href="#">Gestion de stock</a></li>
+        <li><a href="#">Recherche de médicaments</a></li>
+        <li><a href="#">Scan d'ordonnance</a></li>
+        <li><a href="#">Analyse des ventes</a></li>
+        <li><a href="#">Gestion des fournisseurs</a></li>
+        <li><a href="#">Rapports personnalisés</a></li>
+      </ul>
+    </div>
+    
+    <div class="footer-column">
+      <h4>Contactez-nous</h4>
+      <div class="contact-info">
+        <p><i class="fas fa-map-marker-alt"></i> 10 rue des pharmaciens, 1002 Tunis, Tunisie</p>
+        <p><i class="fas fa-phone-alt"></i> +216 70 000 000</p>
+        <p><i class="fas fa-envelope"></i> contact&#64;pharmamind.tn</p>
+        <p><i class="fas fa-clock"></i> Lun - Sam : 8h00 - 20h00</p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="footer-bottom">
+    <p>&copy; 2023 PharmaMind. Tous droits réservés. | <a href="#" style="color: var(--secondary-color);">Politique de confidentialité</a> | <a href="#" style="color: var(--secondary-color);">Conditions d'utilisation</a></p>
   </div>
 </footer>

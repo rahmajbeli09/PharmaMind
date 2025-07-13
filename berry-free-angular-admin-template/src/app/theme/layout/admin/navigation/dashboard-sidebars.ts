@@ -15,7 +15,7 @@ export const ADMIN_SIDEBAR: NavigationItem[] = [
         type: 'item',
         url: '/admin/demandes-inscription',
         icon: 'ti ti-file-text',
-        role: 'ADMIN'
+        role: ['ADMIN']
       },
       {
         id: 'utilisateurs',
@@ -23,7 +23,7 @@ export const ADMIN_SIDEBAR: NavigationItem[] = [
         type: 'item',
         url: '/admin/utilisateurs',
         icon: 'ti ti-users',
-        role: 'ADMIN'
+        role: ['ADMIN']
       },
       {
         id: 'reclamations',
@@ -31,7 +31,7 @@ export const ADMIN_SIDEBAR: NavigationItem[] = [
         type: 'item',
         url: '/admin/reclamations',
         icon: 'ti ti-alert-circle',
-        role: 'ADMIN'
+        role: ['ADMIN']
       },
       {
         id: 'statistiques-admin',
@@ -39,7 +39,7 @@ export const ADMIN_SIDEBAR: NavigationItem[] = [
         type: 'item',
         url: '/admin/statistiques',
         icon: 'ti ti-chart-bar',
-        role: 'ADMIN'
+        role: ['ADMIN']
       }
     ]
   }
@@ -58,7 +58,7 @@ export const RESPONSABLE_PH_SIDEBAR: NavigationItem[] = [
         type: 'item',
         url: '/responsable/pharmaciens',
         icon: 'ti ti-user-plus',
-        role: 'ADMINPH'
+        role: ['ADMINPH']
       },
       {
         id: 'stock-alertes',
@@ -66,7 +66,7 @@ export const RESPONSABLE_PH_SIDEBAR: NavigationItem[] = [
         type: 'item',
         url: '/responsable/stock',
         icon: 'ti ti-package',
-        role: 'ADMINPH'
+        role: ['ADMINPH']
       },
       {
         id: 'ventes',
@@ -74,7 +74,7 @@ export const RESPONSABLE_PH_SIDEBAR: NavigationItem[] = [
         type: 'item',
         url: '/responsable/ventes',
         icon: 'ti ti-shopping-cart',
-        role: 'ADMINPH'
+        role: ['ADMINPH']
       },
       {
         id: 'statistiques-responsable',
@@ -82,7 +82,7 @@ export const RESPONSABLE_PH_SIDEBAR: NavigationItem[] = [
         type: 'item',
         url: '/responsable/statistiques',
         icon: 'ti ti-chart-bar',
-        role: 'ADMINPH'
+        role: ['ADMINPH']
       }
     ]
   }
@@ -101,7 +101,7 @@ export const PHARMACIEN_SIDEBAR: NavigationItem[] = [
         type: 'item',
         url: '/pharmacien/stock',
         icon: 'ti ti-package',
-        role: 'PHARMACIEN'
+        role: ['PHARMACIEN']
       },
       {
         id: 'vente-medicaments',
@@ -109,7 +109,7 @@ export const PHARMACIEN_SIDEBAR: NavigationItem[] = [
         type: 'item',
         url: '/pharmacien/ventes',
         icon: 'ti ti-cash',
-        role: 'PHARMACIEN'
+        role: ['PHARMACIEN']
       }
     ]
   }

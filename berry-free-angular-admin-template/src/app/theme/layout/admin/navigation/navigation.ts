@@ -69,26 +69,26 @@ export function getNavigationItems(role: string): NavigationItem[] {
   const adminPhItems: NavigationItem[] = [
     {
       id: 'gestion-pharmaciens',
-      title: ' Gérer les pharmaciens',
+      title: 'Gérer les pharmaciens',
       type: 'item',
       icon: 'ti ti-user-check',
-      url: '/admin-ph/pharmaciens',
+      url: '/dashboard/responsable-pharmacie',
       role: ['ADMINPH']
     },
     {
       id: 'stock',
-      title: ' Stock & alertes',
+      title: ' Stock',
       type: 'item',
       icon: 'ti ti-package',
-      url: '/admin-ph/stock',
+      url: '/dashboard/stock',
       role: ['ADMINPH']
     },
     {
       id: 'ventes',
-      title: ' Ventes',
+      title: ' Stock & alertes',
       type: 'item',
       icon: 'ti ti-shopping-cart',
-      url: '/admin-ph/ventes',
+      url: '/dashboard/ventes',
       role: ['ADMINPH']
     },
     {
@@ -96,7 +96,7 @@ export function getNavigationItems(role: string): NavigationItem[] {
       title: ' Statistiques',
       type: 'item',
       icon: 'ti ti-chart-bar',
-      url: '/admin-ph/statistiques',
+      url: '/dashboard/statistiques',
       role: ['ADMINPH']
     }
   ];

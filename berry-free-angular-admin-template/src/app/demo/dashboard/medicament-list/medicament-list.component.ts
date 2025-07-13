@@ -1,4 +1,7 @@
 import { Component, OnInit, inject, TemplateRef, ViewChild } from '@angular/core';
+import { Router } from '@angular/router';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NgbPaginationModule, NgbTooltipModule, NgbModal, NgbModalModule, NgbOffcanvas } from '@ng-bootstrap/ng-bootstrap';
@@ -81,7 +84,22 @@ export class MedicamentListComponent implements OnInit {
   private offcanvasService = inject(NgbOffcanvas);
   private medicamentService = inject(MedicamentService);
 
-  constructor() {}
+  constructor(private router: Router) {
+    // Afficher l'ID utilisateur connecté
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        // Décoder le token JWT (si c'est un JWT)
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        console.log('ID utilisateur connecté:', payload.userId || payload.sub || 'Non disponible');
+        console.log('Détails complets du token:', payload);
+      } catch (e) {
+        console.log('ID utilisateur (depuis localStorage):', localStorage.getItem('userId') || 'Non disponible');
+      }
+    } else {
+      console.log('Aucun utilisateur connecté ou token non trouvé');
+    }
+  }
 
   ngOnInit(): void {
     this.loadMedicaments();
@@ -172,21 +190,56 @@ export class MedicamentListComponent implements OnInit {
   validerPanier(): void {
     if (this.panier.length === 0) return;
 
-    // Créer le ticket de caisse
+    // Récupérer l'ID du pharmacien connecté depuis le token
+    const token = localStorage.getItem('token');
+    let pharmacienId: number | null = null;
+    
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        pharmacienId = payload.id;
+        console.log('ID du pharmacien connecté:', pharmacienId);
+      } catch (e) {
+        console.error('Erreur lors de la récupération de l\'ID du pharmacien:', e);
+      }
+    }
+
+    if (!pharmacienId) {
+      alert('Impossible d\'identifier le pharmacien connecté. Veuillez vous reconnecter.');
+      return;
+    }
+
+    // Créer le ticket de caisse avec la structure attendue par le backend
     const ticket: TicketDeCaisse = {
-      items: this.panier.map(item => ({
-        medicamentId: item.medicamentId,
-        medicamentName: item.medicamentName,
-        quantite: item.quantite,
-        prixUnitaire: item.prixUnitaire
-      } as TicketDeCaisseItem)),
       dateSortieTicket: new Date().toISOString(),
-      montantTotal: this.getTotalPanier()
+      montantTotal: this.getTotalPanier(),
+      pharmacien: {
+        id: pharmacienId
+      },
+      medicamentsSelectionnes: this.panier.map(item => {
+        const medicament = this.medicaments.find(m => m.id === item.medicamentId);
+        return {
+          id: item.medicamentId,
+          name: item.medicamentName,
+          dci: medicament?.dci || '',
+          dosage: medicament?.dosage || '',
+          forme: medicament?.forme || '',
+          presentation: medicament?.presentation || '',
+          price: item.prixUnitaire,
+          quantiteStock: (medicament?.quantiteStock || 0) - item.quantite,
+          datePeremption: medicament?.datePeremption ? new Date(medicament.datePeremption).toISOString() : new Date().toISOString(),
+          fournisseur: medicament?.fournisseur || '',
+          categorie: medicament?.categorie || '',
+          remboursement: medicament?.remboursement
+        };
+      })
     };
+    
+    console.log('Données du ticket envoyées au serveur:', JSON.stringify(ticket, null, 2));
 
     // Envoyer le ticket au serveur
     this.medicamentService.saveTicket(ticket).subscribe({
-      next: () => {
+      next: (savedTicket) => {
         // Mettre à jour les stocks pour chaque médicament du panier
         this.panier.forEach(item => {
           const medicament = this.medicaments.find(m => m.id === item.medicamentId);
@@ -203,20 +256,6 @@ export class MedicamentListComponent implements OnInit {
           }
         });
 
-        // Générer et afficher le ticket
-        this.genererTicketPDF(ticket);
-
-        // Réinitialiser le panier
-        this.panier = [];
-        this.showConfirmBtn = false;
-
-        // Fermer le panier
-        if (this.offcanvasRef) {
-          this.offcanvasRef.close();
-        }
-
-        // Afficher une notification de succès
-        alert('Vente enregistrée avec succès !');
         // Générer et télécharger le ticket PDF
         this.genererTicketPDF(ticket);
 
@@ -234,90 +273,120 @@ export class MedicamentListComponent implements OnInit {
       },
       error: (error) => {
         console.error('Erreur lors de la validation du panier:', error);
-        alert('Une erreur est survenue lors de la validation du panier.');
+        alert('Une erreur est survenue lors de la validation du panier. Le ticket va être généré localement.');
+        // Générer le ticket même en cas d'erreur serveur
+        this.genererTicketPDF(ticket);
       }
     });
   }
 
-  genererTicketPDF(ticket: TicketDeCaisse): void {
-    // Créer le contenu HTML du ticket
-    let ticketContent = `
-    <div style="max-width: 80mm; margin: 0 auto; padding: 10px; font-family: Arial, sans-serif; font-size: 12px;">
-      <!-- En-tête avec logo -->
-      <div style="text-align: center; margin-bottom: 10px;">
-        <img src="assets/images/logo.png" alt="Logo" style="max-width: 120px; height: auto; margin-bottom: 10px;">
-        <h2 style="margin: 5px 0; font-size: 16px;">PHARMA MIND</h2>
-        <p style="margin: 0; font-size: 10px; color: #666;">Votre pharmacie de confiance</p>
-        <p style="margin: 5px 0; font-size: 10px;">${new Date(ticket.dateSortieTicket).toLocaleString()}</p>
-        <hr style="border-top: 1px dashed #ccc; margin: 10px 0;">
-      </div>
-      
-      <!-- Détails des articles -->
-      <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 10px;">
-        <thead>
-          <tr>
-            <th style="text-align: left; border-bottom: 1px dashed #ccc; padding: 3px 0;">Article</th>
-            <th style="text-align: right; border-bottom: 1px dashed #ccc; padding: 3px 0; width: 40px;">Qté</th>
-            <th style="text-align: right; border-bottom: 1px dashed #ccc; padding: 3px 0; width: 60px;">Prix U.</th>
-            <th style="text-align: right; border-bottom: 1px dashed #ccc; padding: 3px 0; width: 60px;">Total</th>
-          </tr>
-        </thead>
-        <tbody>`;
-
-    ticket.items.forEach(item => {
-      const prixUnitaire = item.prixUnitaire.toFixed(2);
-      const total = (item.quantite * item.prixUnitaire).toFixed(2);
-      ticketContent += `
-          <tr>
-            <td style="padding: 3px 0;">${item.medicamentName}</td>
-            <td style="text-align: right; padding: 3px 0;">${item.quantite}</td>
-            <td style="text-align: right; padding: 3px 0;">${prixUnitaire} €</td>
-            <td style="text-align: right; padding: 3px 0;">${total} €</td>
-          </tr>`;
+  async genererTicketPDF(ticket: TicketDeCaisse): Promise<void> {
+    const doc = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: [80, 297] // Format A4 en hauteur pour plus d'espace
     });
 
-    ticketContent += `
-          <tr>
-            <td colspan="3" style="text-align: right; border-top: 1px dashed #ccc; padding-top: 8px;">
-              <strong>TOTAL TTC :</strong>
-            </td>
-            <td style="text-align: right; border-top: 1px dashed #ccc; padding-top: 8px;">
-              <strong>${ticket.montantTotal.toFixed(2)} €</strong>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <hr style="border-top: 1px dashed #ccc; margin: 10px 0;">
-      <p style="text-align: center; font-size: 10px; color: #666; margin: 10px 0 5px;">
-        Merci pour votre achat !
-      </p>
-      <p style="text-align: center; font-size: 9px; color: #999; margin: 5px 0;">
-        Rendez-vous sur www.pharmamind.com
-      </p>
-    </div>`;
-
-    // Créer une nouvelle fenêtre avec le contenu du ticket
-    const printWindow = window.open('', '_blank');
-    if (printWindow) {
-      printWindow.document.write(`
-        <html>
-          <head>
-            <title>Ticket de caisse - ${new Date(ticket.dateSortieTicket).toLocaleString()}</title>
-            <style>
-              body { font-family: Arial, sans-serif; padding: 20px; }
-              table { width: 100%; margin-bottom: 20px; }
-              th { text-align: left; }
-              .text-right { text-align: right; }
-              .text-center { text-align: center; }
-            </style>
-          </head>
-          <body onload="window.print();">
-            ${ticketContent}
-          </body>
-        </html>
-      `);
-      printWindow.document.close();
+    // Ajout du logo
+    try {
+      const logo = await this.loadImage('assets/images/logo.png');
+      doc.addImage(logo, 'PNG', 15, 10, 50, 20);
+    } catch (error) {
+      console.error('Erreur lors du chargement du logo:', error);
     }
+
+    // En-tête du ticket
+    doc.setFontSize(14);
+    doc.text('PHARMA MIND', 40, 40, { align: 'center' });
+    doc.setFontSize(10);
+    doc.text('123 Rue de la Pharmacie', 40, 45, { align: 'center' });
+    doc.text('75000 Tunis, Tunisie', 40, 50, { align: 'center' });
+    doc.text('Tél: 01 23 45 67 89', 40, 55, { align: 'center' });
+
+    // Ligne de séparation
+    doc.setDrawColor(200, 200, 200);
+    doc.setLineWidth(0.5);
+    doc.line(10, 60, 70, 60);
+
+    // Détails de la vente
+    doc.setFontSize(10);
+    doc.text(`Ticket #${ticket.id || 'N/A'}`, 10, 70);
+    doc.text(`Date: ${new Date(ticket.dateSortieTicket).toLocaleString()}`, 10, 75);
+    doc.text(`Pharmacien : ${ticket.pharmacien?.nom || 'Non spécifié'}`, 10, 80);
+
+    // Ligne de séparation
+    doc.line(10, 85, 70, 85);
+
+    // En-tête du tableau
+    doc.setFontSize(9);
+    doc.setTextColor(100, 100, 100);
+    doc.text('Article', 10, 95);
+    doc.text('Qté', 45, 95);
+    doc.text('P.U.', 60, 95, { align: 'right' });
+    doc.text('Total', 80, 95, { align: 'right' });
+
+    // Détails des articles
+    doc.setFontSize(9);
+    doc.setTextColor(0, 0, 0);
+    let y = 105;
+    
+    ticket.medicamentsSelectionnes.forEach((medicament) => {
+      // Nom du médicament (avec retour à la ligne si trop long)
+      const splitName = doc.splitTextToSize(medicament.name, 30);
+      doc.text(splitName, 10, y);
+      
+      // Quantité (on utilise 1 comme quantité par défaut car elle n'est pas stockée dans le ticket)
+      doc.text('1', 45, y + (splitName.length > 1 ? 10 : 0));
+      
+      // Prix unitaire
+      doc.text(medicament.price.toFixed(2) + ' €', 60, y + (splitName.length > 1 ? 10 : 0), { align: 'right' });
+      
+      // Total ligne (prix unitaire * 1)
+      doc.text(medicament.price.toFixed(2) + ' €', 80, y + (splitName.length > 1 ? 10 : 0), { align: 'right' });
+      
+      y += (splitName.length > 1 ? 15 : 10);
+    });
+
+    // Ligne de séparation
+    doc.line(10, y, 70, y);
+    y += 10;
+
+    // Total
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'bold');
+    doc.text('Total:', 60, y, { align: 'right' });
+    doc.text(ticket.montantTotal.toFixed(2) + ' €', 80, y, { align: 'right' });
+    y += 10;
+
+    // Remerciements
+    doc.setFont(undefined, 'normal');
+    doc.setFontSize(8);
+    doc.text('Merci pour votre achat !', 40, y + 10, { align: 'center' });
+    doc.text('À bientôt dans votre pharmacie', 40, y + 15, { align: 'center' });
+
+    // Pied de page
+    doc.setFontSize(7);
+    doc.setTextColor(100, 100, 100);
+    doc.text('TVA non applicable, article 293B du CGI', 40, y + 30, { align: 'center' });
+    doc.text('Service client: contact@pharmamind.fr', 40, y + 35, { align: 'center' });
+
+    // Sauvegarder le PDF
+    const date = new Date().toISOString().slice(0, 19).replace('T', '_').replace(/:/g, '-');
+    doc.save(`ticket-${date}.pdf`);
+  }
+
+  // Méthode utilitaire pour charger une image
+  private loadImage(src: string): Promise<HTMLImageElement> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = 'Anonymous';
+      img.onload = () => resolve(img);
+      img.onerror = (error) => {
+        console.error('Erreur lors du chargement de l\'image:', error);
+        reject(error);
+      };
+      img.src = src;
+    });
   }
 
   toggleQuantiteInput(medicament: Medicament | number): void {
@@ -336,21 +405,21 @@ export class MedicamentListComponent implements OnInit {
     }
   }
 
-  ajouterAuPanier(medicament: Medicament): void {
+  ajouterAuPanier(medicament: Medicament, quantite?: number): void {
     if (medicament.id === undefined) return;
     
-    const quantite = this.quantiteSelectionnee[medicament.id] || 1;
+    const qty = quantite || this.quantiteSelectionnee[medicament.id] || 1;
     
     if (quantite > 0 && quantite <= (medicament.quantiteStock || 0)) {
       const existingItem = this.panier.find(item => item.medicamentId === medicament.id);
       
       if (existingItem) {
-        existingItem.quantite += quantite;
+        existingItem.quantite += qty;
       } else {
         this.panier.push({
           medicamentId: medicament.id,
           medicamentName: medicament.name,
-          quantite: quantite,
+          quantite: qty,
           prixUnitaire: medicament.price || 0
         });
       }
@@ -388,23 +457,8 @@ export class MedicamentListComponent implements OnInit {
   }
 
   // Dialog methods
-  openAddDialog(medicament?: Medicament) {
-    const modalRef = this.modalService.open(AddMedicamentDialogComponent, { size: 'lg' });
-    if (medicament) {
-      modalRef.componentInstance.medicament = { ...medicament };
-      modalRef.componentInstance.editMode = true;
-    }
-    
-    modalRef.result.then(
-      (result) => {
-        if (result) {
-          this.onMedicamentUpdated(result);
-        }
-      },
-      () => {
-        // Dismissed
-      }
-    );
+  openAddDialog() {
+   
   }
 
   onMedicamentUpdated(updatedMedicament: Medicament) {
@@ -482,7 +536,7 @@ export class MedicamentListComponent implements OnInit {
 
   // Medicament CRUD operations
   openEditDialog(medicament: Medicament) {
-    this.openAddDialog(medicament);
+    this.openAddDialog();
   }
 
   onDeleteConfirmed() {

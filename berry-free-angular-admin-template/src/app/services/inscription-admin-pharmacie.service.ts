@@ -21,6 +21,19 @@ export interface PharmacienRequest {
   pharmacieId: number | string;
 }
 
+export interface Pharmacie {
+  id: number;
+  nom: string;
+  adresse: string;
+  ville: string;
+  gouvernorat: string;
+  codePostal: string;
+  telephone: string;
+  latitude: number | null;
+  longitude: number | null;
+  // Ajoutez d'autres champs si nécessaire
+}
+
 export interface InscriptionAdminPharmacieRequest {
   nom: string;
   email: string;
@@ -67,6 +80,34 @@ export class InscriptionAdminPharmacieService {
 
   activerUtilisateur(userId: number): Observable<any> {
     return this.http.post(`${this.apiUrl}/utilisateurs/activer`, { userId }, { responseType: 'text' });
+  }
+
+  verifierCoordonneesNulles(userId: number): Observable<boolean> {
+    return this.http.get<boolean>(`http://localhost:8080/api/pharmacie-coordonnees-nulles/${userId}`).pipe(
+      tap(estNul => console.log('Coordonnées nulles?', estNul))
+    );
+  }
+
+  getPharmacieByUserId(userId: number): Observable<Pharmacie> {
+    // Utiliser l'URL de base sans /auth pour cet endpoint
+    return this.http.get<Pharmacie>(`http://localhost:8080/api/pharmacie-by-user/${userId}`).pipe(
+      tap(pharmacie => console.log('Détails de la pharmacie reçus:', pharmacie))
+    );
+  }
+
+  updateLocalisation(pharmacieId: number, latitude: number, longitude: number): Observable<Pharmacie> {
+    return this.http.put<Pharmacie>(
+      `http://localhost:8080/api/${pharmacieId}/localisation`,
+      null,
+      {
+        params: {
+          latitude: latitude.toString(),
+          longitude: longitude.toString()
+        }
+      }
+    ).pipe(
+      tap(pharmacie => console.log('Localisation mise à jour:', pharmacie))
+    );
   }
 
   addUtilisateurToPharmacie(utilisateur: any, pharmacieId: number): Observable<any> {

@@ -35,7 +35,11 @@ export class MedicamentService {
     return this.http.put<Medicament>(`${this.apiUrl}/${medicament.id}`, medicament);
   }
 
-  saveTicket(ticket: TicketDeCaisse): Observable<any> {
-    return this.http.post<any>('http://localhost:8080/api/tickets', ticket);
+  saveTicket(ticket: TicketDeCaisse): Observable<TicketDeCaisse> {
+    return this.http.post<TicketDeCaisse>('http://localhost:8080/api/tickets', ticket);
+  }
+
+  getNomPharmacien(id: number): Observable<{nom: string}> {
+    return this.http.get<{nom: string}>(`http://localhost:8080/api/utilisateurs/${id}/nom`);
   }
 }

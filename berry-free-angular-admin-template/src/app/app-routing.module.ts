@@ -41,6 +41,14 @@ const routes: Routes = [
       {
         path: 'dashboard/medicaments',
         loadChildren: () => import('./demo/dashboard/medicament/medicament.module').then(m => m.MedicamentModule)
+      },
+      {
+        path: 'dashboard/stock',
+        loadComponent: () => import('./demo/dashboard/stock/stock').then(m => m.Stock)
+      },
+      {
+        path: 'dashboard/ventes',
+        loadChildren: () => import('./demo/dashboard/ventes/ventes.module').then(m => m.VentesModule)
       }
     ]
   },
@@ -58,7 +66,13 @@ const routes: Routes = [
       },
       {
         path: 'home',
-        loadComponent: () => import('./demo/pages/home/home.component').then((c) => c.HomeComponent)
+        loadComponent: () => import('./demo/pages/home/home.component').then((c) => c.HomeComponent),
+        data: { animation: 'HomePage' }
+      },
+      {
+        path: '',
+        redirectTo: '/home',
+        pathMatch: 'full'
       },
       {
         path: 'login',

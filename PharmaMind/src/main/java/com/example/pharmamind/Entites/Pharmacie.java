@@ -37,4 +37,5 @@ public class Pharmacie {
     @OneToMany(mappedBy = "pharmacie")
     @JsonManagedReference
     private List<Utilisateur> utilisateurs;
+
 }

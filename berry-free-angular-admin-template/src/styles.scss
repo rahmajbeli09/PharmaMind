@@ -8,6 +8,11 @@ File: style.css
 =========================================================================
 =================================================================================== */
 
+/* Style pour le défilement fluide */
+html {
+  scroll-behavior: smooth;
+}
+
 // main framework
 @import 'node_modules/bootstrap/scss/functions';
 @import 'node_modules/bootstrap/scss/variables';

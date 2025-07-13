@@ -122,14 +122,25 @@ export class MedicamentListComponent implements OnInit, OnDestroy {
 
     // Créer le ticket de caisse
     const ticket: TicketDeCaisse = {
-      items: this.panier.map(item => ({
-        medicamentId: item.medicamentId,
-        medicamentName: item.medicamentName,
-        quantite: item.quantite,
-        prixUnitaire: item.prixUnitaire
-      } as TicketDeCaisseItem)),
       dateSortieTicket: new Date().toISOString(),
-      montantTotal: this.getTotalPanier()
+      montantTotal: this.getTotalPanier(),
+      pharmacien: {
+        id: 1 // À remplacer par l'ID du pharmacien connecté
+      },
+      medicamentsSelectionnes: this.panier.map(item => ({
+        id: item.medicamentId,
+        name: item.medicamentName,
+        dci: '',
+        dosage: '',
+        forme: '',
+        presentation: '',
+        price: item.prixUnitaire,
+        quantiteStock: 0,
+        datePeremption: new Date().toISOString(),
+        fournisseur: '',
+        categorie: '',
+        remboursement: 0
+      }))
     };
 
     // Envoyer le ticket au serveur
@@ -212,13 +223,15 @@ export class MedicamentListComponent implements OnInit, OnDestroy {
         </thead>
         <tbody>`;
 
-    ticket.items.forEach(item => {
-      const prixUnitaire = item.prixUnitaire.toFixed(2);
-      const total = (item.quantite * item.prixUnitaire).toFixed(2);
+    ticket.medicamentsSelectionnes.forEach(item => {
+      const prixUnitaire = item.price.toFixed(2);
+      // Utiliser une quantité de 1 par défaut car la quantité n'est pas stockée dans le ticket
+      const quantite = 1;
+      const total = (quantite * item.price).toFixed(2);
       ticketContent += `
           <tr>
-            <td style="padding: 3px 0;">${item.medicamentName}</td>
-            <td style="text-align: right; padding: 3px 0;">${item.quantite}</td>
+            <td style="padding: 3px 0;">${item.name}</td>
+            <td style="text-align: right; padding: 3px 0;">${quantite}</td>
             <td style="text-align: right; padding: 3px 0;">${prixUnitaire} €</td>
             <td style="text-align: right; padding: 3px 0;">${total} €</td>
           </tr>`;

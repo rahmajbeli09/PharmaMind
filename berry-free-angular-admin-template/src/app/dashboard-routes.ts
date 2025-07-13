@@ -7,20 +7,9 @@ export const ADMIN_ROUTES: Routes = [
   },
   {
     path: 'admin/demandes-inscription',
-    loadComponent: () => import('./demo/admin/demandes-inscription/demandes-inscription.component').then(m => m.DemandesInscriptionComponent)
+    loadComponent: () => import('./demo/dashboard/admin/dashboard-admin.component').then(m => m.DashboardAdminComponent)
   },
-  {
-    path: 'admin/utilisateurs',
-    loadComponent: () => import('./demo/admin/utilisateurs/utilisateurs.component').then(m => m.UtilisateursComponent)
-  },
-  {
-    path: 'admin/reclamations',
-    loadComponent: () => import('./demo/admin/reclamations/reclamations.component').then(m => m.ReclamationsComponent)
-  },
-  {
-    path: 'admin/statistiques',
-    loadComponent: () => import('./demo/admin/statistiques/statistiques.component').then(m => m.StatistiquesComponent)
-  }
+  
 ];
 
 export const RESPONSABLE_PHARMACIE_ROUTES: Routes = [
@@ -33,16 +22,16 @@ export const RESPONSABLE_PHARMACIE_ROUTES: Routes = [
     loadComponent: () => import('./demo/responsable/pharmaciens/pharmaciens.component').then(m => m.PharmaciensComponent)
   },
   {
-    path: 'responsable/stock',
-    loadComponent: () => import('./demo/responsable/stock/stock/stock.component').then(m => m.StockComponent)
-  },
-  {
     path: 'responsable/ventes',
     loadComponent: () => import('./demo/responsable/ventes/ventes/ventes.component').then(m => m.VentesComponent)
   },
   {
     path: 'responsable/statistiques',
     loadComponent: () => import('./demo/responsable/statistiques/statistiques/statistiques.component').then(m => m.StatistiquesComponent)
+  },
+  {
+    path: 'dashboard/stock',
+    loadComponent: () => import('./demo/dashboard/stock/stock').then(m => m.Stock)
   }
 ];
 

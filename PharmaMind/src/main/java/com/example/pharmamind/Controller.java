@@ -4,12 +4,17 @@ import com.example.pharmamind.Services;
 import com.example.pharmamind.Entites.*;
 import com.google.cloud.vision.v1.*;
 import com.google.protobuf.ByteString;
+import io.jsonwebtoken.Claims;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +27,9 @@ public class Controller {
     @Autowired
     private Services serviceGlobal;
     @Autowired
-    private MedicamentRepo medicamentRepository; // Ou ton service
+    private MedicamentRepo medicamentRepository;
+    @Autowired
+    private JwtUtil jwtUtil;
 
     // --- Medicament ---
     @GetMapping("/medicaments")
@@ -58,6 +65,13 @@ public class Controller {
     @GetMapping("/utilisateurs")
     public List<Utilisateur> getAllUtilisateurs() {
         return serviceGlobal.getAllUtilisateurs();
+    }
+
+    @GetMapping("/utilisateurs/{id}/nom")
+    public ResponseEntity<?> getNomUtilisateur(@PathVariable Long id) {
+        return serviceGlobal.getUtilisateurById(id)
+                .map((Utilisateur utilisateur) -> ResponseEntity.ok(Map.of("nom", utilisateur.getNom())))
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping("/utilisateurs")
@@ -218,6 +232,38 @@ public class Controller {
     public List<TicketDeCaisse> getAllTickets() {
         return serviceGlobal.getAllTickets();
     }
+    @GetMapping("/pharmacie-id-by-user/{userId}")
+    public ResponseEntity<Long> getPharmacieId(@PathVariable Long userId) {
+        try {
+            Long pharmacieId = serviceGlobal.getPharmacieIdByUtilisateurId(userId);
+            return ResponseEntity.ok(pharmacieId);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+    @GetMapping("/pharmacie-coordonnees-nulles/{userId}")
+    public ResponseEntity<Boolean> pharmacieCoordonneesNulles(@PathVariable Long userId) {
+        try {
+            boolean sontNulles = serviceGlobal.pharmacieCoordonneesSontNulles(userId);
+            return ResponseEntity.ok(sontNulles);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
+        }
+    }
+
+
+    @GetMapping("/tickets/{pharmacieId}/{date}")
+    public ResponseEntity<List<TicketDeCaisse>> getTicketByIdPharmacieEtDate(
+            @PathVariable Long pharmacieId,
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        try {
+            List<TicketDeCaisse> tickets = serviceGlobal.getTicketsByDateAndPharmacieId(date, pharmacieId);
+            return ResponseEntity.ok(tickets);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
 
     @PostMapping("/tickets")
     public TicketDeCaisse saveTicket(@RequestBody TicketDeCaisse ticket) {
@@ -251,5 +297,22 @@ public class Controller {
         serviceGlobal.deleteTicket(id);
     }
 
+    @GetMapping("/{id}/pharmacien")
+    public ResponseEntity<String> getNomPharmacienByTicketId(@PathVariable Long id) {
+        try {
+            String nomPharmacien = serviceGlobal.getNomPharmacienByTicketId(id);
+            return ResponseEntity.ok(nomPharmacien);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+    @PutMapping("/{id}/localisation")
+    public ResponseEntity<Pharmacie> updateLocalisation(
+            @PathVariable Long id,
+            @RequestParam double latitude,
+            @RequestParam double longitude) {
 
+        Pharmacie updatedPharmacie = serviceGlobal.updateLocation(id, latitude, longitude);
+        return ResponseEntity.ok(updatedPharmacie);
+    }
 }

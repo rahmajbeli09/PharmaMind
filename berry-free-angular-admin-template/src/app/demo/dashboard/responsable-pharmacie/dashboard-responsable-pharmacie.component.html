@@ -1,4 +1,23 @@
 <div class="dashboard-responsable-pharmacie">
+  <!-- Bannière de localisation manquante - Version Élégante -->
+  <div *ngIf="showLocationPrompt" class="location-prompt">
+    <div class="location-message">
+      <i class="fas fa-map-marker-alt"></i>
+      <div class="message-content">
+        <h4>Localisation requise</h4>
+        <p>Veuillez définir l'emplacement de votre pharmacie pour une meilleure expérience utilisateur et une meilleure visibilité.</p>
+      </div>
+    </div>
+    <div class="location-actions">
+      <button (click)="ajouterEmplacement()" class="btn-link primary">
+        <i class="fas fa-map-marker-alt me-2"></i>Définir l'emplacement
+      </button>
+      <button (click)="showLocationPrompt = false" class="btn-link">
+        Plus tard
+      </button>
+    </div>
+  </div>
+
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h2 class="mb-0">Dashboard Responsable Pharmacie</h2>
     <button class="btn btn-primary" (click)="ouvrirFormulaireAjout()">
@@ -101,6 +120,36 @@
             </div>
           </form>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Carte Leaflet pour la sélection de l'emplacement -->
+  <div *ngIf="showMap" class="map-container">
+    <div class="card">
+      <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">Sélectionnez l'emplacement de votre pharmacie</h5>
+      </div>
+      <div class="card-body p-0">
+        <div leaflet 
+             [leafletOptions]="mapOptions"
+             (leafletClick)="onMapClick($event)"
+             [leafletLayers]="layers"
+             [leafletLayersControl]="layersControl"
+             (leafletMapReady)="onMapReady($event)">
+        </div>
+      </div>
+      <div class="card-footer d-flex justify-content-between">
+        <button class="btn btn-secondary" (click)="showMap = false" [disabled]="isSaving">
+          Annuler
+        </button>
+        <button class="btn btn-primary" 
+                (click)="enregistrerLocalisation()" 
+                [disabled]="!selectedLatitude || !selectedLongitude || isSaving">
+          <span *ngIf="!isSaving">Enregistrer l'emplacement</span>
+          <span *ngIf="isSaving" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+          <span *ngIf="isSaving" class="ms-2">Enregistrement...</span>
+        </button>
       </div>
     </div>
   </div>

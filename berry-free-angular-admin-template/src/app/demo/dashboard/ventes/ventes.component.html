@@ -1,0 +1,286 @@
+<div class="card">
+  <div class="card-header d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h4 class="mb-0">Gestion des Ventes</h4>
+      <small class="text-muted">{{ collectionSize }} médicament(s) trouvé(s)</small>
+    </div>
+    <div class="d-flex gap-2">
+      <button class="btn btn-outline-primary" (click)="ouvrirImportDialog()">
+        <i class="ti ti-upload me-2"></i>Importer
+      </button>
+      <button class="btn btn-primary" (click)="ouvrirFormulaireModification()">
+        <i class="ti ti-plus me-2"></i>Ajouter un médicament
+      </button>
+    </div>
+  </div>
+  
+  <div class="card-body">
+    <!-- Message de chargement -->
+    <div *ngIf="loading" class="text-center py-4">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Chargement...</span>
+      </div>
+      <p class="mt-2 mb-0">Chargement des médicaments...</p>
+    </div>
+
+    <!-- Message d'erreur -->
+    <div *ngIf="error" class="alert alert-danger">
+      <i class="ti ti-alert-circle me-2"></i> {{ error }}
+    </div>
+
+    <!-- Liste des médicaments -->
+    <div *ngIf="!loading && !error">
+      <!-- Barre de recherche et filtres -->
+      <div class="row mb-4 g-3">
+        <div class="col-md-6">
+          <div class="input-group">
+            <span class="input-group-text"><i class="ti ti-search"></i></span>
+            <input type="text" class="form-control" 
+                   [(ngModel)]="searchTerm" 
+                   (input)="onSearchInput($event)"
+                   placeholder="Rechercher par nom, DCI, forme...">
+          </div>
+        </div>
+        <div class="col-md-4">
+          <select class="form-select" [(ngModel)]="selectedCategory" (change)="page = 1">
+            <option value="">Toutes les catégories</option>
+            <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <button class="btn btn-outline-secondary w-100" (click)="resetFilters()">
+            <i class="ti ti-filter-off me-1"></i> R&eacute;initialiser
+          </button>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead class="table-light">
+            <tr>
+              <th>Nom</th>
+              <th>DCI</th>
+              <th>Prix</th>
+              <th>Stock</th>
+              <th class="text-end">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let medicament of medicamentsFiltres" [class.low-stock]="medicament.quantiteStock < 10">
+              <td>{{ medicament.name }}</td>
+              <td>{{ medicament.dci }}</td>
+              <td>{{ medicament.price | currency:'MAD ':'symbol':'1.2-2' }}</td>
+              <td>
+                <span class="badge" 
+                      [ngClass]="medicament.quantiteStock < 10 ? 'bg-danger' : 'bg-success'">
+                  {{ medicament.quantiteStock }}
+                </span>
+              </td>
+              <td class="text-center">
+                <button class="btn btn-sm btn-primary me-1" (click)="ouvrirFormulaireModification(medicament)">
+                  <i class="ti ti-edit"></i>
+                </button>
+                <button class="btn btn-sm btn-danger" (click)="supprimerMedicament(medicament.id)">
+                  <i class="ti ti-trash"></i>
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="medicamentsFiltres.length === 0">
+              <td colspan="7" class="text-center py-4">
+                <div class="text-muted">
+                  <i class="ti ti-package-off fs-1 d-block mb-2"></i>
+                  Aucun médicament trouvé
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Pagination -->
+        <div class="d-flex justify-content-between align-items-center mt-3">
+          <div class="d-flex align-items-center">
+            <span class="me-2">Afficher</span>
+            <select class="form-select form-select-sm" style="width: auto;" 
+                   [(ngModel)]="pageSize" (change)="onPageSizeChange($any($event.target).value)">
+              <option [value]="5">5</option>
+              <option [value]="10">10</option>
+              <option [value]="20">20</option>
+              <option [value]="50">50</option>
+            </select>
+            <span class="ms-2">éléments par page</span>
+          </div>
+          
+          <div class="d-flex align-items-center">
+            <span class="me-3">
+              Affichage de {{ (page - 1) * pageSize + 1 }} à {{ Math.min(page * pageSize, collectionSize) }} sur {{ collectionSize }}
+            </span>
+            <ngb-pagination 
+              [(page)]="page" 
+              [pageSize]="pageSize" 
+              [collectionSize]="collectionSize"
+              [maxSize]="5"
+              [rotate]="true"
+              [ellipses]="false"
+              [boundaryLinks]="true"
+              class="pagination-sm mb-0">
+            </ngb-pagination>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de modification de médicament -->
+<div *ngIf="afficherFormulaireModification" class="modal" [ngStyle]="{'display': 'block', 'background-color': 'rgba(0,0,0,0.5)'}">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">
+          <i class="ti ti-package me-2"></i>
+          {{ medicamentEnCoursEdition.id ? 'Modifier le médicament' : 'Nouveau médicament' }}
+        </h5>
+        <button type="button" class="btn-close btn-close-white" (click)="fermerFormulaireModification()"></button>
+      </div>
+      <div class="modal-body p-4">
+        <form (ngSubmit)="mettreAJourMedicament()" #medicamentForm="ngForm">
+          <div class="row g-3">
+            <!-- Nom du médicament -->
+            <div class="col-md-6">
+              <label for="nom" class="form-label fw-medium">
+                <i class="ti ti-tag me-2"></i>Nom commercial <span class="text-danger">*</span>
+              </label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="ti ti-package"></i></span>
+                <input type="text" class="form-control" id="nom" name="nom" 
+                       [(ngModel)]="medicamentEnCoursEdition.name" required>
+              </div>
+            </div>
+
+            <!-- DCI -->
+            <div class="col-md-6">
+              <label for="dci" class="form-label fw-medium">
+                <i class="ti ti-notes me-2"></i>DCI <span class="text-danger">*</span>
+              </label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="ti ti-file-text"></i></span>
+                <input type="text" class="form-control" id="dci" name="dci" 
+                       [(ngModel)]="medicamentEnCoursEdition.dci" required>
+              </div>
+            </div>
+
+            <!-- Dosage -->
+            <div class="col-md-4">
+              <label for="dosage" class="form-label fw-medium">
+                <i class="ti ti-arrow-up-circle me-2"></i>Dosage
+              </label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="ti ti-ruler-measure"></i></span>
+                <input type="text" class="form-control" id="dosage" name="dosage" 
+                       [(ngModel)]="medicamentEnCoursEdition.dosage" 
+                       placeholder="Ex: 50 mg">
+              </div>
+            </div>
+
+            <!-- Forme -->
+            <div class="col-md-4">
+              <label for="forme" class="form-label fw-medium">
+                <i class="ti ti-pill me-2"></i>Forme
+              </label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="ti ti-capsule"></i></span>
+                <input type="text" class="form-control" id="forme" name="forme" 
+                       [(ngModel)]="medicamentEnCoursEdition.forme"
+                       placeholder="Ex: Comprimés">
+              </div>
+            </div>
+
+            <!-- Catégorie -->
+            <div class="col-md-4">
+              <label for="categorie" class="form-label fw-medium">
+                <i class="ti ti-category me-2"></i>Catégorie
+              </label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="ti ti-tags"></i></span>
+                <select class="form-select" id="categorie" name="categorie" 
+                        [(ngModel)]="medicamentEnCoursEdition.categorie">
+                  <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Prix -->
+            <div class="col-md-4">
+              <label for="prix" class="form-label fw-medium">
+                <i class="ti ti-currency-dinar me-2"></i>Prix (DT) <span class="text-danger">*</span>
+              </label>
+              <div class="input-group">
+                <span class="input-group-text">DT</span>
+                <input type="number" step="0.010" class="form-control text-end" 
+                       id="prix" name="prix" [(ngModel)]="medicamentEnCoursEdition.price" 
+                       required min="0">
+              </div>
+            </div>
+
+            <!-- Remboursement -->
+            <div class="col-md-4">
+              <label for="remboursement" class="form-label fw-medium">
+                <i class="ti ti-currency-dollar me-2"></i>Remboursement
+              </label>
+              <div class="input-group">
+                <span class="input-group-text">DT</span>
+                <input type="number" step="0.010" class="form-control text-end" 
+                       id="remboursement" name="remboursement" 
+                       [(ngModel)]="medicamentEnCoursEdition.remboursement" min="0">
+              </div>
+            </div>
+
+            <!-- Quantité en stock -->
+            <div class="col-md-4">
+              <label for="quantiteStock" class="form-label fw-medium">
+                <i class="ti ti-package-import me-2"></i>Stock <span class="text-danger">*</span>
+              </label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="ti ti-box"></i></span>
+                <input type="number" class="form-control text-end" id="quantiteStock" 
+                       name="quantiteStock" [(ngModel)]="medicamentEnCoursEdition.quantiteStock" 
+                       required min="0">
+              </div>
+            </div>
+
+            <!-- Présentation -->
+            <div class="col-12">
+              <label for="presentation" class="form-label fw-medium">
+                <i class="ti ti-notes me-2"></i>Présentation
+              </label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="ti ti-file-description"></i></span>
+                <textarea class="form-control" id="presentation" name="presentation" 
+                          rows="2" [(ngModel)]="medicamentEnCoursEdition.presentation"
+                          placeholder="Ex: Boîte de 30 comprimés"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Boutons d'action -->
+          <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+            <button type="button" class="btn btn-light" 
+                    (click)="fermerFormulaireModification()" 
+                    [disabled]="enregistrementEnCours">
+              <i class="ti ti-x me-2"></i>Annuler
+            </button>
+            <button type="submit" class="btn btn-primary" 
+                    [disabled]="!medicamentForm.form.valid || enregistrementEnCours">
+              <i class="ti ti-device-floppy me-2"></i>
+              <span *ngIf="!enregistrementEnCours">
+                {{ medicamentEnCoursEdition.id ? 'Mettre à jour' : 'Enregistrer' }}
+              </span>
+              <span *ngIf="enregistrementEnCours" class="spinner-border spinner-border-sm" 
+                    role="status" aria-hidden="true"></span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,3 +1,199 @@
+/* Style pour la bannière de localisation manquante - Version Élégante */
+.location-prompt {
+  position: relative;
+  padding: 1.25rem 1.5rem;
+  margin: 1.5rem 0;
+  background: linear-gradient(135deg, #fff9f0 0%, #fff1e0 100%);
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-left: 4px solid #ffb74d;
+  overflow: hidden;
+  transition: all 0.3s ease-in-out;
+  
+  /* Effet de vague subtil en arrière-plan */
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 120px;
+    height: 100%;
+    background: url("data:image/svg+xml,%3Csvg width='120' height='100%25' viewBox='0 0 120 100' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M120 50C120 77.6142 97.6142 100 70 100C42.3858 100 20 77.6142 20 50C20 22.3858 42.3858 0 70 0C97.6142 0 120 22.3858 120 50Z' fill='%23FFE0B2' fill-opacity='0.4'/%3E%3C/svg%3E%0A") no-repeat right center;
+    opacity: 0.8;
+    z-index: 0;
+  }
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  }
+  
+  .location-message {
+    display: flex;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+    
+    i {
+      font-size: 1.5rem;
+      margin-right: 1rem;
+      color: #ff9800;
+      background: white;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .message-content {
+      h4 {
+        margin: 0 0 0.25rem 0;
+        color: #5d4037;
+        font-weight: 600;
+        font-size: 1.1rem;
+      }
+      
+      p {
+        margin: 0;
+        color: #8d6e63;
+        font-size: 0.95rem;
+        line-height: 1.5;
+      }
+    }
+  }
+  
+  .location-actions {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+    
+    .btn-link {
+      background: none;
+      border: none;
+      color: #5d4037;
+      cursor: pointer;
+      font-size: 0.8rem;
+      padding: 0.4rem 0.5rem;
+      position: relative;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      
+      &.primary {
+        color: #ff6d00;
+        font-weight: 500;
+        
+        i {
+          color: #ff6d00;
+        }
+        
+        &::after {
+          background-color: #ff6d00;
+        }
+        
+        &:hover {
+          color: #e65100;
+          
+          i {
+            color: #e65100;
+          }
+        }
+      }
+      
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 1px;
+        background-color: #5d4037;
+        transform: scaleX(0);
+        transform-origin: right;
+        transition: transform 0.3s ease;
+      }
+      
+      &:hover {
+        color: #3e2723;
+        
+        &::after {
+          transform: scaleX(1);
+          transform-origin: left;
+        }
+      }
+      
+      &:focus {
+        outline: none;
+        box-shadow: none;
+      }
+    }
+    
+    .btn {
+      white-space: nowrap;
+      min-width: 140px;
+      padding: 0.4rem 0.8rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      
+      &.btn-primary {
+        background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+        border: none;
+        box-shadow: 0 2px 5px rgba(245, 124, 0, 0.3);
+        
+        &:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 4px 8px rgba(245, 124, 0, 0.4);
+        }
+        
+        &:active {
+          transform: translateY(0);
+        }
+      }
+      
+      &.btn-outline-secondary {
+        border: 1px solid #d7ccc8;
+        color: #5d4037;
+        
+        &:hover {
+          background-color: rgba(0, 0, 0, 0.02);
+          border-color: #bcaaa4;
+        }
+      }
+    }
+  }
+  
+  /* Animation de pulsation subtile */
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(255, 167, 38, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(255, 167, 38, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 167, 38, 0); }
+  }
+  
+  /* Animation au survol de l'icône */
+  i.fa-map-marker-alt {
+    animation: pulse 2s infinite;
+    
+    &:hover {
+      animation: none;
+      transform: scale(1.1);
+    }
+  }
+}
+
 .dashboard-responsable-pharmacie {
   padding: 2rem;
   max-width: 1400px;

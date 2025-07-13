@@ -1,0 +1,155 @@
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h2>Gestion des Tickets de Caisse</h2>
+        </div>
+        
+        <div class="card-body">
+          <!-- Sélecteur de date -->
+          <div class="mb-4">
+            <label for="dateSelectionnee" class="form-label">Sélectionnez une date :</label>
+            <div class="d-flex gap-2">
+              <input 
+                type="date" 
+                id="dateSelectionnee" 
+                class="form-control" 
+                style="max-width: 200px;"
+                [(ngModel)]="dateSelectionnee"
+                (change)="chargerTickets()">
+              <button class="btn btn-primary" (click)="chargerTickets()" [disabled]="chargement">
+                <i class="ti ti-refresh"></i> Actualiser
+              </button>
+            </div>
+          </div>
+
+          <!-- Message d'erreur -->
+          <div *ngIf="erreur" class="alert alert-danger">
+            {{ erreur }}
+          </div>
+
+          <!-- Indicateur de chargement -->
+          <div *ngIf="chargement" class="text-center my-4">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Chargement...</span>
+            </div>
+            <p class="mt-2">Chargement des tickets en cours...</p>
+          </div>
+
+          <!-- Liste des tickets -->
+          <div *ngIf="!chargement && tickets.length > 0">
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead class="table-light">
+                  <tr>
+                    <th>N° Ticket</th>
+                    <th>Date</th>
+                    <th>Pharmacien</th>
+                    <th>Montant Total</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let ticket of tickets" (click)="selectionnerTicket(ticket)" style="cursor: pointer;">
+                    <td>#{{ ticket.id }}</td>
+                    <td>{{ ticket.dateSortieTicket | date:'dd/MM/yyyy HH:mm' }}</td>
+                    <td>{{ ticket.pharmacien?.nom || 'N/A' }}</td>
+                    <td>{{ ticket.montantTotal | currency:'TND ':'symbol':'1.2-2' }}</td>
+                    <td>
+                      <button class="btn btn-sm btn-outline-primary" (click)="selectionnerTicket(ticket); $event.stopPropagation()">
+                        <i class="ti ti-eye"></i> Voir
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Message si aucun ticket -->
+          <div *ngIf="!chargement && tickets.length === 0" class="alert alert-info">
+            Aucun ticket trouvé pour la date sélectionnée.
+          </div>
+
+          <!-- Détails du ticket sélectionné -->
+          <div *ngIf="ticketSelectionne" class="mt-4">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title mb-0">Détails du Ticket #{{ ticketSelectionne.id }}</h3>
+              </div>
+              <div class="card-body">
+                <div class="row mb-3">
+                  <div class="col-md-6">
+                    <p><strong>Date :</strong> {{ ticketSelectionne.dateSortieTicket | date:'dd/MM/yyyy' }}</p>
+                    <p><strong>Heure :</strong> {{ ticketSelectionne.dateSortieTicket | date:'HH:mm' }}</p>
+                    <p><strong>Pharmacien :</strong> {{ ticketSelectionne.pharmacien?.nom || 'N/A' }}</p>
+                  </div>
+                  <div class="col-md-6 text-md-end">
+                    <h3 class="mb-0">{{ ticketSelectionne.montantTotal | currency:'TND ':'symbol':'1.2-2' }}</h3>
+                  </div>
+                </div>
+
+                <h5 class="mb-3">Détail des médicaments :</h5>
+                <div *ngIf="ticketSelectionne.medicamentsSelectionnes && ticketSelectionne.medicamentsSelectionnes.length > 0; else pasDeMedicaments">
+                  <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                      <thead class="table-light">
+                        <tr>
+                          <th>Nom commercial</th>
+                          <th>DCI</th>
+                          <th>Dosage</th>
+                          <th>Forme</th>
+                          <th class="text-end">Prix unitaire</th>
+                          <th class="text-end">Remboursement</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr *ngFor="let med of ticketSelectionne.medicamentsSelectionnes">
+                          <td>
+                            <strong>{{ med.name || 'Non spécifié' }}</strong>
+                            <div class="small text-muted">{{ med.presentation }}</div>
+                          </td>
+                          <td>{{ med.dci || 'N/A' }}</td>
+                          <td>{{ med.dosage || 'N/A' }}</td>
+                          <td>{{ med.forme || 'N/A' }}</td>
+                          <td class="text-end">{{ med.price | currency:'TND ':'symbol':'1.2-2' }}</td>
+                          <td class="text-end">{{ med.remboursement ? (med.remboursement | currency:'TND ':'symbol':'1.2-2') : 'Non remboursé' }}</td>
+                        </tr>
+                      </tbody>
+                      <tfoot class="table-light">
+                        <tr>
+                          <td colspan="4" class="text-end"><strong>Total :</strong></td>
+                          <td colspan="2" class="text-end">
+                            <strong>{{ ticketSelectionne.montantTotal | currency:'TND ':'symbol':'1.2-2' }}</strong>
+                          </td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </div>
+                </div>
+                <ng-template #pasDeMedicaments>
+                  <div class="alert alert-info">Aucun détail de médicament disponible pour ce ticket.</div>
+                </ng-template>
+
+                <div class="d-flex justify-content-between mt-4">
+                  <button class="btn btn-outline-secondary" (click)="ticketSelectionne = null">
+                    <i class="ti ti-arrow-left"></i> Retour à la liste
+                  </button>
+                  <div>
+                    <button class="btn btn-outline-primary me-2" (click)="imprimerTicket(ticketSelectionne)">
+                      <i class="ti ti-printer"></i> Imprimer
+                    </button>
+                    <button class="btn btn-primary" (click)="genererPDF(ticketSelectionne)">
+                      <i class="ti ti-download"></i> Télécharger PDF
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

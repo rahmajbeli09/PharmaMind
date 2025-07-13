@@ -7,7 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 @Service
@@ -146,4 +150,46 @@ public class Services {
     }
 
 
+    public Optional<Utilisateur> getUtilisateurById(Long id) {
+        return utilisateurRepo.findById(id);
+    }
+
+    public List<TicketDeCaisse> getTicketsByDateAndPharmacieId(LocalDate date, Long pharmacieId) {
+        return ticketDeCaisseRepo.findAllByPharmacieIdAndExactDate(pharmacieId, date);
+    }
+    public Long getPharmacieIdByUtilisateurId(Long userId) {
+        return utilisateurRepo.findPharmacieIdByUtilisateurId(userId);
+    }
+    public boolean pharmacieCoordonneesSontNulles(Long userId) {
+        Optional<Utilisateur> utilisateurOpt = utilisateurRepo.findById(userId);
+
+        if (utilisateurOpt.isPresent()) {
+            Pharmacie pharmacie = utilisateurOpt.get().getPharmacie();
+            if (pharmacie != null) {
+                return pharmacie.getLatitude() == 0.0 && pharmacie.getLongitude() == 0.0;
+            }
+        }
+
+        return false; // soit utilisateur ou pharmacie n'existe pas
+    }
+
+
+    public String getNomPharmacienByTicketId(Long ticketId) {
+        Optional<TicketDeCaisse> optionalTicket = ticketDeCaisseRepo.findById(ticketId);
+        if (optionalTicket.isPresent()) {
+            Utilisateur pharmacien = optionalTicket.get().getPharmacien();
+            return pharmacien != null ? pharmacien.getNom() : "Pharmacien non défini";
+        } else {
+            throw new RuntimeException("Ticket non trouvé avec l'ID : " + ticketId);
+        }
+    }
+    public Pharmacie updateLocation(Long idPharmacie, double latitude, double longitude) {
+        Pharmacie pharmacie = pharmacieRepo.findById(idPharmacie)
+                .orElseThrow(() -> new RuntimeException("Pharmacie non trouvée avec ID: " + idPharmacie));
+
+        pharmacie.setLatitude(latitude);
+        pharmacie.setLongitude(longitude);
+
+        return pharmacieRepo.save(pharmacie);
+    }
 }
